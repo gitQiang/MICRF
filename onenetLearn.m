@@ -12,14 +12,14 @@ maxState = max(nStates);
 % maxState % Maximum number of states that any node can take
 % nNodes  % Total number of nodes
 
-adj = zeros(nNodes); % Symmetric {0,1} matrix containing edges
-for r = 1:length(node1)
-    [~,i] = ismember(node1(r),genes);
-    [~,j] = ismember(node2(r),genes);
-    adj(i,j)=1;
-    adj(j,i)=1;
-    adj(i,i)=0;
-end
+% adj = zeros(nNodes); % Symmetric {0,1} matrix containing edges
+% for r = 1:length(node1)
+%     [~,i] = ismember(node1(r),genes);
+%     [~,j] = ismember(node2(r),genes);
+%     adj(i,j)=1;
+%     adj(j,i)=1;
+%     adj(i,i)=0;
+% end
 
 % Make structure that tracks edge information
 edgeStruct = UGM_makeEdgeStruct(adj,nStates); 
@@ -55,13 +55,13 @@ for n = 1:length(node_s)
         %nodePot(j,:) = nodePot(j,:)/max(nodePot(j,:));
 end
 
-amax = max(nodePot(:,1));
-amin = min(nodePot(:,1));
-nodePot(:,1)= (nodePot(:,1)-amin)/(amax-amin);
-
-amax = max(nodePot(:,2));
-amin = min(nodePot(:,2));
-nodePot(:,2)= (nodePot(:,2)-amin)/(amax-amin);
+% amax = max(nodePot(:,1));
+% amin = min(nodePot(:,1));
+% nodePot(:,1)= (nodePot(:,1)-amin)/(amax-amin);
+% 
+% amax = max(nodePot(:,2));
+% amin = min(nodePot(:,2));
+% nodePot(:,2)= (nodePot(:,2)-amin)/(amax-amin);
 
 
 % Make (non-negative) potential of each edge taking each state combination
@@ -83,14 +83,11 @@ for e = 1:nEdges
     sube = find(tmp==2);
     
     %% important edge potential definition
-    edgePot(1,1,e) = 0.5*(nodePot(n1,1)+nodePot(n2,1))*F(sube);
-    edgePot(1,2,e) = 0.5*(nodePot(n1,1)+nodePot(n2,2))*F(sube);
-    edgePot(2,1,e) = 0.5*(nodePot(n1,2)+nodePot(n2,1))*F(sube);
-    edgePot(2,2,e) = 0.5*(nodePot(n1,2)+nodePot(n2,2))*F(sube);
+    edgePot(1,1,e) =   0.5 * (abs(nodePot(n1,1)) + abs(nodePot(n2,1)))*F(sube);
+    edgePot(1,2,e) =   0.5 * (abs(nodePot(n1,1)) + abs(nodePot(n2,1)) - abs(nodePot(n1,1) - nodePot(n2,2)))*F(sube);
+    edgePot(2,1,e) =   edgePot(1,2,e);
+    edgePot(2,2,e) =   edgePot(1,1,e);
 end
-
-save newedge4.mat
-
 
 %% loop until convergence 
 nodePot0 = nodePot;
@@ -132,8 +129,8 @@ w = ones(nParams,1);
 fM = -1 * ones(10,10);
 w1M = -1 * ones(10,10);
 w2M = -1 * ones(10,10);
-for i=5
-    for j=5
+for i=1:10
+    for j=1:10
         w(1)=i/10;
         w(2)=j/10;
         % initial parameters
@@ -150,8 +147,7 @@ for i=5
         Y = int32(Y');
         % training a CRF model
         options = struct('Display','iter','MaxIter',100,'TolX',1e-5);
-        lambda = ones(size(w));
-        %lambda(2) = 10;
+        lambda = 10*ones(size(w)); %lambda(2) = 10;
         regFunObj = @(w)penalizedL2(w,@UGM_CRF_NLL,lambda,Xnode,Xedge,Y,nodeMap,edgeMap,edgeStruct,inferFunc);
         [w,f]= minFunc(regFunObj,w);
         %[w,f] = minFunc(@UGM_CRF_NLL,w,options,Xnode,Xedge,Y,nodeMap,edgeMap,edgeStruct,inferFunc);
