@@ -23,7 +23,41 @@ for kk=1:100
 end
 
 %% optimal w values
-load('coexp_10_5.mat')
+addpath(genpath(pwd))
+load('coexp_max_1_v4.mat')
+
+
+nodePot0 = nodePot;
+edgePot0 = edgePot;
+
+
+%% initial node and edge features
+nNodes = length(genes);
+nInstance = 1;
+% Make node features
+nNodeFeatures = 2;
+Xnode = zeros(nInstance, nNodeFeatures, nNodes);
+Xnode(1,1,:) = nodePot0(:,1);
+Xnode(1,2,:) = nodePot0(:,2);
+
+% Make edge features
+%Xedge = makeEdgeFeatures_ehq(Xnode,edgeStruct.edgeEnds,edgePot0);
+nEdges = size(edgeStruct.edgeEnds,1);
+nEdgeFeatures=4;
+% Compute Edge Features (use node features from both nodes)
+Xedge = zeros(nInstance,nEdgeFeatures,nEdges);
+for i = 1:nInstance
+    for e = 1:nEdges
+        Xedge(i,1,e) = edgePot0(1,1,e);
+        Xedge(i,2,e) = edgePot0(1,2,e);
+        Xedge(i,3,e) = edgePot0(2,1,e);
+        Xedge(i,4,e) = edgePot0(2,2,e);
+    end
+end
+
+[nodeMap,edgeMap] = UGM_makeCRFmaps_ehq(Xnode,Xedge,edgeStruct);
+nParams = max([nodeMap(:);edgeMap(:)]);
+
 wop=zeros(nParams,1);
 lx=find(fM==min(fM(:)));
 [rx,cx]=ind2sub(size(fM),lx);
@@ -48,4 +82,8 @@ for n = 1:1000
 end
 
 a=find(Y==1);
-length(intersect(a,subT(:,1)))
+length(intersect(a,subT(1:100,1)))
+length(intersect(a,subT(1:200,1)))
+length(intersect(a,subT(1:500,1)))
+
+

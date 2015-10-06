@@ -1,7 +1,7 @@
 function a = qsub(kk)
 
 addpath(genpath(pwd))
-load('coexp_10_5.mat')
+load('coexp_max_1_v4.mat')
 
 %% loop until convergence 
 nodePot0 = nodePot;
@@ -39,16 +39,20 @@ nParams = max([nodeMap(:);edgeMap(:)]);
 %% run with different initial w values
 
 w = ones(nParams,1);
+f = 100000;
 
 i = floor((kk-1)/10) + 1;
 j = mod(kk,10);
-if(j==0) j = 10; end
+if j==0 
+    j = 10; 
+end
 
 
         w(1)=i/10;
         w(2)=j/10;
         % initial parameters
         w0 = w;
+        f0 = f;
         flag = 0;
         iter = 0;
         inferFunc = @UGM_Infer_LBP; %inferFunc = @UGM_Infer_TRBP; %inferFunc = @UGM_Infer_MeanField; %inferFunc = @UGM_Infer_Junction;  %inferFunc = @UGM_Infer_Block_MF;   %inferFunc = @UGM_Infer_Conditional; 
@@ -61,14 +65,16 @@ if(j==0) j = 10; end
         Y = int32(Y');
         % training a CRF model
         options = struct('Display','iter','MaxIter',100,'TolX',1e-5);
-        lambda = 10*ones(size(w)); %lambda(2) = 10;
+        lambda = ones(size(w)); %lambda(2) = 10;
         regFunObj = @(w)penalizedL2(w,@UGM_CRF_NLL,lambda,Xnode,Xedge,Y,nodeMap,edgeMap,edgeStruct,inferFunc);
         [w,f]= minFunc(regFunObj,w);
         %[w,f] = minFunc(@UGM_CRF_NLL,w,options,Xnode,Xedge,Y,nodeMap,edgeMap,edgeStruct,inferFunc);
 
         if norm(w-w0,1) <= 1e-5
+        %if abs(f-f0) <= 1e-5 
             flag = 1;
         else
+            f0 = f;
             w0 = w;
         end
 
