@@ -43,25 +43,18 @@ end
 % 1 risk state, 2 non-risk state
 
 % Make (non-negative) potential of each node taking each state
-nodePot = zeros(nNodes,maxState); %!!!!!!!!! zeros and ones for node information
-nodePot(:,1) = log10(0.06);
-nodePot(:,2) = -log10(0.06);
+nodePot = ones(nNodes,maxState); %!!!!!!!!! zeros and ones for node information
+nodePot(:,1) = 0.06;
+nodePot(:,2) = 0.94;
+
 for n = 1:length(node_s)
         [~,j] = ismember(node_s(n),genes);
         [~,i] = ismember(node_s(n),nodes);
         
-        nodePot(j,1) = score1(i);
-        nodePot(j,2) = score2(i);
-        %nodePot(j,:) = nodePot(j,:)/max(nodePot(j,:));
+        nodePot(j,1) = 10^score1(i);
+        nodePot(j,2) = 1;
+        nodePot(j,:) = nodePot(j,:)/max(nodePot(j,:));
 end
-
-% amax = max(nodePot(:,1));
-% amin = min(nodePot(:,1));
-% nodePot(:,1)= (nodePot(:,1)-amin)/(amax-amin);
-% 
-% amax = max(nodePot(:,2));
-% amin = min(nodePot(:,2));
-% nodePot(:,2)= (nodePot(:,2)-amin)/(amax-amin);
 
 
 % Make (non-negative) potential of each edge taking each state combination
@@ -83,11 +76,12 @@ for e = 1:nEdges
     sube = find(tmp==2);
     
     %% important edge potential definition
-    edgePot(1,1,e) =   0.5 * (abs(nodePot(n1,1)) + abs(nodePot(n2,1)))*F(sube);
-    edgePot(1,2,e) =   0.5 * (abs(nodePot(n1,1)) + abs(nodePot(n2,1)) - abs(nodePot(n1,1) - nodePot(n2,2)))*F(sube);
-    edgePot(2,1,e) =   edgePot(1,2,e);
-    edgePot(2,2,e) =   edgePot(1,1,e);
+    edgePot(1,1,e) =   0.5 * (nodePot(n1,1) + nodePot(n2,1))*F(sube);
+    edgePot(1,2,e) =   (1 - 0.5*(nodePot(n1,1) + nodePot(n2,1)))*F(sube);
+    edgePot(2,1,e) =   (1 - 0.5*(nodePot(n1,2) + nodePot(n2,2)))*F(sube);
+    edgePot(2,2,e) =   0.5 * (nodePot(n1,2) + nodePot(n2,2))*F(sube);
 end
+
 
 %% loop until convergence 
 nodePot0 = nodePot;
