@@ -1,7 +1,8 @@
+function wop=getonePara(onefile,dirstr)
+
 fM = -1 * ones(10,10);
 w1M = -1 * ones(10,10);
 w2M = -1 * ones(10,10);
-
 YM = -1 * ones(10,10);
 
 for kk=1:100
@@ -10,7 +11,7 @@ for kk=1:100
     j = mod(kk,10);
     if(j==0) j = 10; end
     
-    filename= [int2str(kk) '.mat'];
+    filename= [dirstr int2str(kk) '.mat'];
     load(filename)
         
     fM(i,j)=f;
@@ -18,19 +19,16 @@ for kk=1:100
     w2M(i,j)=w(2);
     YM(i,j)=sum(Y==1);
     
-    clearvars -except fM w1M w2M YM kk
+    clearvars -except fM w1M w2M YM kk dirstr onefile
     kk
 end
 
 %% optimal w values
 addpath(genpath(pwd))
-load('coexp_max_1_v4.mat')
-
+load(onefile)
 
 nodePot0 = nodePot;
 edgePot0 = edgePot;
-
-
 %% initial node and edge features
 nNodes = length(genes);
 nInstance = 1;
@@ -85,5 +83,7 @@ a=find(Y==1);
 length(intersect(a,subT(1:100,1)))
 length(intersect(a,subT(1:200,1)))
 length(intersect(a,subT(1:500,1)))
+
+end
 
 

@@ -13,48 +13,22 @@ length(intersect(a,subT(1:100,1)))
 length(intersect(a,subT(1:200,1)))
 length(intersect(a,subT(1:500,1)))
 
-
-%% steps:
-
-% step 1: generate the adj matrix for each network
-adj = step1_adj(netfile);
-%save  a.mat adj
-
-
-% step 2: make the node feature and edge feature
-step2_feature(netfile,beness,nodef, filename)
-
-
-
-% step 3: optimal the parameters
-
-% qsub.m
-% getonePara.m
-
-
-
-% step 4: give the infer ande decoding results based on optimal parameters
-
-
-
+%=======================================================================
 % 27
 netfile='data_hq/brainspan_net_top5.txt';
 beness='data_hq/Betweenness_edge_coexp5.txt';
 nodef='data_hq/hotnet_inputmetap.txt';
-[w f Y]=nenetLearn(netfile,beness,nodef);
 
 % 20
 netfile='data_hq/StringNew_HPRD_mnet.txt';
 beness='data_hq/Betweenness_edge_HPRD.txt';
 nodef='data_hq/hotnet_inputmetap.txt';
-[w f Y]=nenetLearn(netfile,beness,nodef);
 
 
 % 3
 netfile='data_hq/STRINGnetmap.txt';
 beness='data_hq/Betweenness_edge_STRING.txt';
 nodef='data_hq/CRF_inputmetap.txt';
-[w f Y]=nenetLearn(netfile,beness,nodef);
 
 
 % 6
@@ -81,3 +55,4 @@ nodef='data_hq/hotnet_inputmetap.txt';
 netfile='data_hq/brainspan_net_top7.txt';
 beness='data_hq/Betweenness_edge_coexp7.txt';
 nodef='data_hq/hotnet_inputmetap.txt';
+

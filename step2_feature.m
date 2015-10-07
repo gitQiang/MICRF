@@ -1,4 +1,5 @@
-function step2_feature(netfile,beness,nodef, filename)
+function step2_feature(netfile,beness,nodef,adjf,filename)
+load(adjf);
 
 % read the network edges and node
 [node1,node2,weights] = textread(netfile,'%s%s%f','delimiter','\t');
@@ -11,7 +12,7 @@ maxState = max(nStates);
 edgeStruct = UGM_makeEdgeStruct(adj,nStates); 
 nEdges = edgeStruct.nEdges;
 
-%% Make the non-negative node and edge potentials
+% Make the non-negative node and edge potentials
 % read TADA score
 [nodes, score1, score2] = textread(nodef,'%s%f%f','delimiter','\t');
 node_s = intersect(nodes,genes);
