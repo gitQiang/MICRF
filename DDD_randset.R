@@ -21,7 +21,7 @@ DDD_randset <- function(){
     strname <- "meta"
     dirstr <- "result/"
     TADAinput1(filename,strname,dirstr,genelist0=1)
-    
+    TADAinput2(filename,"meta2",dirstr,genelist0=1)
     
     n <- length(samples)
     #### the thrid case: independent data sets
@@ -71,17 +71,21 @@ TADAinputT <- function(){
     ##### after running TADA: randsetDDD.R
     source("Network_analysis.R")
     source("Multi_net.R")
-    dirstr <- "result/randset4/"
+    source("DDD_randset.R")
+    #dirstr <- "result/randset4/"
+    dirstr <- "result/randset4_2/"
     for(j in 3){
         for(i in 1:20){
             filename=paste("../TADA_DAWN/result/randset4/TADAdenovo_ASD1sub",j,"depart",i,".csv",sep="")
             strname <- paste("part",j,"_",i,sep="")
-            TADAinput1(filename,strname,dirstr,genelist0=1)
+            #TADAinput1(filename,strname,dirstr,genelist0=1)
+            TADAinput2(filename,strname,dirstr,genelist0=1)
         }
     }
     
     ## after running TADA: randsetDDD.R
-    dirstr <- "result/leaveone4/"
+    #dirstr <- "result/leaveone4/"
+    dirstr <- "result/leaveone4_2/"
     filename <- "../TADA_DAWN/result/TADAdenovo_meta_dmis.csv"
     asddata <- read.csv(filename)
     asddata[is.na(asddata[,"qvalue.dn"]),"qvalue.dn"] <- 1
@@ -90,16 +94,19 @@ TADAinputT <- function(){
     for(i in 1:length(genes)){
         filename=paste("../TADA_DAWN/result/leaveone4/TADAdenovo_rand2_",i,".csv",sep="")
         strname <- paste("rand2_",i,sep="")
-        TADAinput1(filename,strname,dirstr,genelist0=1)
+        #TADAinput1(filename,strname,dirstr,genelist0=1)
+        TADAinput2(filename,strname,dirstr,genelist0=1)
     }
     
     ## after running TADA: randsetDDD.R
-    dirstr <- "result/randset_1/"
+    #dirstr <- "result/randset_1/"
+    dirstr <- "result/randset_1_2/"
     for(j in 2:9){
         for(i in 1:20){
             filename=paste("../TADA_DAWN/result/randset_1/TADAdenovo_ASDrand1_",j,"_",i,".csv",sep="")
             strname <- paste("rand1",j,"_",i,sep="")
-            TADAinput1(filename,strname,dirstr,genelist0=1)
+            #TADAinput1(filename,strname,dirstr,genelist0=1)
+            TADAinput2(filename,strname,dirstr,genelist0=1)
         }
     }
     
@@ -164,7 +171,7 @@ control_data <- function(){
     TADAinput1(filename,strname,dirstr,genelist0=1)  
 }
 
-TADAinput2 <- function(filenames,strname,dirstr="random_samples/",pi0=0.94,genelist0="",N){
+TADAinput2 <- function(filenames,strname,dirstr="random_samples/",pi0=0.94,genelist0=""){
     
     if(genelist0==""){
         bfs <- "BF"
@@ -177,26 +184,14 @@ TADAinput2 <- function(filenames,strname,dirstr="random_samples/",pi0=0.94,genel
         geneinfo <- read.csv(TADAFile,stringsAsFactors=FALSE)
         geneinfo <- geneinfo[!is.na(geneinfo[,bfs]),]
         
-        #pi <- 1-pi0
-        #posP <- (geneinfo[,bfs]*pi)/(geneinfo[,bfs]*pi + 1-pi)
-        #posP <- dpois(geneinfo[,"dn.LoF"],lambda = N*2*geneinfo[,"LOF"])*dpois(geneinfo[,"dn.mis3"], lambda = N*2*geneinfo[,"dmis"])##/dpois(geneinfo[,"dn.LoF"] + geneinfo[,"dn.mis3"],lambda = N*2*(geneinfo[,"LOF"]+geneinfo[,"dmis"]))
-        ## maybe I can try this directly
-        
-        #posP <- cbind(posP*geneinfo[,bfs],posP)
-        #posP <- sapply(1:dim(posP)[1],function(ki) posP[ki,]/max(posP[ki,]))
-        #posP <- t(posP)
-        
-        posP <- cbind(log10(geneinfo[,bfs]),-log10(geneinfo[,bfs]))
+        posP <- cbind(log10(geneinfo[,bfs]),-log10(geneinfo[,bfs])) # for matlab trainging and R inferring 
         
         infofile <- paste(dirstr,"hotnet_input",strname[i],".txt",sep="")
         write.table(cbind(geneinfo[,1],posP),file=infofile,quote=FALSE,col.names=FALSE,row.names=FALSE,sep="\t")
         
         genelist <- geneinfo[,1]
         genelist <- mapT[match(genelist,mapT[,2]),1]
-        
-        #nodesim <- (geneinfo[,bfs]*pi)/(geneinfo[,bfs]*pi + 1-pi)
         nodesim <- posP
-        
         rownames(nodesim) <- genelist
         subs <- !is.na(genelist)
         nodesim <- nodesim[subs,]

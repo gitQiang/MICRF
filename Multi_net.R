@@ -7,9 +7,17 @@ Multi_net <- function(netflag,strn="LBP",filenames,fileexp,modulefile,cutn=15000
     load(modulefile)
     module <- module[module[,1] %in% allnet$node,]
     #module <- build_module(allnet$matrix)
-    nodeinfo <- build_node(module,1,filenames)
-    ## deal with NA
-    nodeinfo[is.na(nodeinfo[,1]),1] <- 0
+    
+    if(net_e <= 4){
+        nodeinfo <- build_node(module,1,filenames)
+        ## deal with NA
+        nodeinfo[is.na(nodeinfo[,1]),1] <- 0
+    }else{
+        nodeinfo <- build_node_1(module,filenames)
+        mode(nodeinfo) <- "numeric"
+        if(any(is.na(nodeinfo))) print("NA error!!")
+    }
+    
     POSpro <- build_CRF(nodeinfo,allnet,module,netflag,strn,cutn,beta,net_e)
     if(idm){
         mapT <- as.matrix(read.delim("Fmap0121.txt",header=FALSE,sep="\t"))
@@ -346,6 +354,19 @@ build_node <- function(module,flag=1,filenames=c("TADAinfo.txt","CNVinfo.txt","o
     nodeinfo
 }
 
+build_node_1 <- function(module,filenames){
+    
+    genes <- module[,1]
+    nodeinfo <- matrix(0,length(genes),2,dimnames=list(genes,1:2))
+    nodeinfo[,1] <- 0.06
+    nodeinfo[,2] <- 0.94
+    tmp <- as.matrix(read.table(filenames[1]))
+    tmp <- tmp[tmp[,1] %in% genes,]
+    nodeinfo[match(tmp[,1],rownames(nodeinfo)),] <- tmp[,2:3]
+    
+    nodeinfo
+}
+
 build_node1 <- function(module,net,filenames,netflag){
     
     genes <- module[,1]
@@ -531,7 +552,7 @@ build_CRF <- function(nodeinfo,allnet,module,netflag,strn,cutn=100000,beta=0,net
     for (i in 1:n.module){
         modgenes <- as.vector(module[module[,2]==modLab[i],1])
         if(length(netflag)==1){
-            net <- discrete_net(allnet,modgenes,netflag,cutn,nodeinfo,net_e)
+            net <- discrete_net(allnet,modgenes,netflag,cutn,nodeinfo[,1],net_e)
         }else{
             net <- combine_net(allnet,modgenes,netflag)
         }
@@ -540,8 +561,11 @@ build_CRF <- function(nodeinfo,allnet,module,netflag,strn,cutn=100000,beta=0,net
         
         modnodeinfo <- nodeinfo[match(modgenes,rownames(nodeinfo)),]
         ### change 6_3
-        model <- build_model_0(modnodeinfo,net,net_e,beta)
-           
+        if(net_e < 5){
+            model <- build_model_0(modnodeinfo,net,net_e,beta)
+        }else{
+            model <- build_model_1(modnodeinfo,net,net_e,beta)
+        }
         crfresult <- infer_crf(model, query.type=4)
         POSpro[match(modgenes,POSpro[,1]),2:3] <- crfresult
         ###print(min(crfresult))
@@ -601,6 +625,49 @@ build_model_0 <- function(modnodesim,net,net_e,beta=0){
         W1[2,1] <- 0
         crf$edge.pot[[e]] <- exp(W1)
     }
+    crf
+}
+
+build_model_1 <- function(modnodesim,net,net_e=5,beta){   
+    ## net_e discard parameter for old version
+    ## beta: weights for two features
+    
+    n.nf <- dim(as.matrix(modnodesim))[2]
+    S <- modnodesim
+    colnames(S) <- 1:2
+    subs <- abs(S[,1])==abs(S[,2])
+    S[subs,1] <- 10^S[subs,1]
+    S[subs,2] <- 1
+    S[subs,] <- S[subs,]/matrix(apply(S[subs,],1,max),sum(subs),2,byrow=FALSE)
+    
+    n.states <- 2
+    n.node <- net$size
+    query.net <- net$matrix
+    crf <- make.crf(net$matrix, rep(n.states,net$size))
+    
+    crf$state.map <- matrix(n.node, nrow=crf$n.nodes, ncol=crf$max.state)
+    for (i in 1:crf$n.nodes)
+    {
+        crf$state.map[i, 1:crf$n.states[i]] <- 1:n.states
+        crf$node.pot[i,] <- exp(beta[1] * S[i, crf$state.map[i,]])
+    }   
+    
+    we <- net$we
+    
+    W1 <- matrix(1,n.states,n.states)
+    for (e in 1:crf$n.edges){
+        n1 <- crf$edges[e, 1]
+        n2 <- crf$edges[e, 2]
+        
+        W1[1,1] = 0.5 * (S[n1,1] + S[n2,1]) * we[n1,n2]
+        W1[1,2] = ( 1-0.5 * (S[n1,1] + S[n2,1]) ) * we[n1,n2]
+        W1[2,1] = ( 1-0.5 * (S[n1,2] + S[n2,2]) ) * we[n1,n2]
+        W1[2,2] = 0.5 * (S[n1,2] + S[n2,2]) * we[n1,n2]
+        
+        W1 <- beta[2] * W1
+        crf$edge.pot[[e]] <- exp(W1)
+    }
+    
     crf
 }
 

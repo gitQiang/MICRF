@@ -62,6 +62,110 @@ control_case_meta <- function(kk){
 		
 }
 
+batch_randset4 <- function(i){
+    
+    source("CRF_build.R")
+    source("MixNet.R")
+    source("Network_analysis.R")
+    source("Multi_net.R")
+    options(stringsAsFactors=FALSE)
+    fileexp <- "PCGCall.txt" 
+    netstr <- c("STRING/","iRef/","coexp/","HPRD/","coexp1/","corr/","coexp5/","coexp7/")
+    modulefiles <- c("module3","iRefmodule","DAWNmodule","HPRDmodule","DAWNmodule","module_coexp","module_coexp","module_coexp")
+    
+    betaM=matrix(c(7.1162,6.5513),8,2,byrow=TRUE)
+    dirstr <- "result/randset4_2/"
+    net_e=5
+    dirfold <- paste("result/randresult4_",net_e,"/",sep="")
+        
+    k = 1
+    for(netflag in c(3,6,7,20,21,26,27,28)){   
+        if(netflag==3){ instr <- "CRF_input";idm=TRUE; }else{ instr <- "hotnet_input"; idm=FALSE;}
+        modulefile <- modulefiles[k]
+        
+        beta <- betaM[k,]
+        ## random set 4: different sample size and more samples
+        j=3
+        strname <- paste("part",j,"_",i,sep="")
+        filename <- paste(dirstr,instr,strname,".txt",sep="")
+        strn <- paste(dirfold,netstr[k],"CRFresult_",netflag,strname,sep="")
+        Multi_net(netflag,strn,filename,fileexp,modulefile,cutn=100000,idm,beta=beta,net_e=net_e);       
+        
+        k <- k + 1
+    } 
+
+}
+
+batch_leaveone4 <- function(i){
+    
+    source("CRF_build.R")
+    source("MixNet.R")
+    source("Network_analysis.R")
+    source("Multi_net.R")
+    options(stringsAsFactors=FALSE,expressions=500000)
+    fileexp <- "PCGCall.txt" 
+    netstr <- c("STRING/","iRef/","coexp/","HPRD/","coexp1/","corr/","coexp5/","coexp7/")
+    modulefiles <- c("module3","iRefmodule","DAWNmodule","HPRDmodule","DAWNmodule","module_coexp","module_coexp","module_coexp")
+    
+    betaM=matrix(c(7.1162,6.5513),8,2,byrow=TRUE)
+    dirstr <- "result/leaveone4_2/"
+    net_e=5
+    dirfold=paste("result/leaveone4result_",net_e,"/",sep="")
+
+    k = 1
+    for(netflag in c(3,6,7,20,21,26,27,28)){
+        if(netflag==3){ instr <- "CRF_input";idm=TRUE; }else{ instr <- "hotnet_input"; idm=FALSE;}
+        modulefile <- modulefiles[k]
+        
+        beta <- betaM[k,]
+        strname <- paste("rand2_",i,sep="")
+        filename <- paste(dirstr,instr,strname,".txt",sep="")
+        strn <- paste(dirfold,netstr[k],"CRFresult_",netflag,strname,sep="")
+        Multi_net(netflag,strn,filename,fileexp,modulefile,cutn=100000,idm,beta=beta,net_e=net_e);      
+        
+        k <- k + 1
+    }
+    
+}
+
+batch_randset_1_faster <- function(k){
+    
+    source("CRF_build.R")
+    source("MixNet.R")
+    source("Network_analysis.R")
+    source("Multi_net.R")
+    fileexp <- "PCGCall.txt" 
+    netstr <- c("STRING/","iRef/","coexp/","HPRD/","coexp1/","corr/","coexp5/","coexp7/")
+    modulefiles <- c("module3","iRefmodule","DAWNmodule","HPRDmodule","DAWNmodule","module_coexp","module_coexp","module_coexp")
+    
+    ## bestP
+    betaM=matrix(c(7.1162,6.5513),8,2,byrow=TRUE)
+    netfs <- c(3,6,7,20,21,26,27,28)
+    dirfold <- "result/randresult_5/"
+    dirstr <- "result/randset_1_2/"
+    
+    for(netk in 1:8){
+        netflag <- netfs[netk]
+        net_e <- 5
+        beta <- BetaM[netk,]
+        
+        if(netflag==3){ instr <- "CRF_input";idm=TRUE; }else{ instr <- "hotnet_input"; idm=FALSE;}
+        modulefile <- modulefiles[netk]
+        
+        ## random set 1
+        i <- k %% 20
+        if(i==0) i=20
+        j <- floor((k-1)/20) + 2
+        
+        strname <- paste("rand1",j,"_",i,sep="")
+        filename <- paste(dirstr,instr,strname,".txt",sep="")
+        strn <- paste(dirfold,netstr[netk],"CRFresult_",netflag,strname,sep="")
+        Multi_net(netflag,strn,filename,fileexp,modulefile,cutn=100000,idm,beta=beta,net_e=net_e);       
+        
+    }
+    
+}
+
 batch_ASD_randset4 <- function(kk){
 	
     source("CRF_build.R")
