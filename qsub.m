@@ -68,8 +68,8 @@ while flag==0
     
     % fix bugs for illegal direction
     if isnan(f)==1 
-        w(1)=7;
-        w(2)=6;
+        w(1)=w(1)+7;
+        w(2)=w(2)+6;
         [nodePot,edgePot] = UGM_CRF_makePotentials(w,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,1);
         Y = UGM_Decode_LBP(nodePot,edgePot,edgeStruct);
         Y = int32(Y');
