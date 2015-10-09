@@ -567,7 +567,9 @@ build_CRF <- function(nodeinfo,allnet,module,netflag,strn,cutn=100000,beta=0,net
             model <- build_model_1(modnodeinfo,net,net_e,beta)
         }
         crfresult <- infer_crf(model, query.type=4)
-        POSpro[match(modgenes,POSpro[,1]),2:3] <- crfresult
+        labels <- decode.lbp(model)
+        POSpro[match(modgenes,POSpro[,1]),2:3] <- cbind(crfresult[,1],labels)
+        
         ###print(min(crfresult))
     }
     
@@ -635,7 +637,7 @@ build_model_1 <- function(modnodesim,net,net_e=5,beta){
     n.nf <- dim(as.matrix(modnodesim))[2]
     S <- modnodesim
     colnames(S) <- 1:2
-    subs <- abs(S[,1])==abs(S[,2])
+    subs <- !(S[,1]==0.06 & S[,2]==0.94)
     S[subs,1] <- 10^S[subs,1]
     S[subs,2] <- 1
     S[subs,] <- S[subs,]/matrix(apply(S[subs,],1,max),sum(subs),2,byrow=FALSE)

@@ -129,23 +129,56 @@ control_data <- function(){
     ## after running TADA
     source("Network_analysis.R")
     source("Multi_net.R")
+    source("DDD_randset.R")
     dirstr <- "result/control/"
     filename <- "../TADA_DAWN/result/TADAdenovo_control.csv"
-    strname <- "control"
+    #strname <- "control"
+    #TADAinput1(filename,strname,dirstr,genelist0=1)
+    strname <- "control_2"
+    TADAinput2(filename,strname,dirstr,genelist0=1)
+    
+    
+    
+    ## control 1911
+    mutrate<- read.csv("data/mutarate/PCGCSCI.csv")
+    mutrate <- mutrate[!duplicated(mutrate[,2]),-1]
+    colnames(mutrate) <- c("Gene","LOF","dmis","mis","syn")
+    ddd <- read.csv("../TADA_DAWN/data/control_1911.csv")[,c("GENE","dn.LOF","dn.DMIS","dn.MIS","dn.SYN")]
+    colnames(ddd) <- c("Gene","dn.LoF","dn.mis3","dn.mis","dn.syn")
+    data <- mutrate
+    ig <- intersect(mutrate[,1],ddd[,1])
+    data[,c("dn.LoF","dn.mis3","dn.mis","dn.syn")] <- 0
+    data[match(ig,data[,1]),c("dn.LoF","dn.mis3","dn.mis","dn.syn")] <- ddd[match(ig,ddd[,1]),c("dn.LoF","dn.mis3","dn.mis","dn.syn")]
+    write.csv(data,file="DDD_mutations/datasheet/control1911.csv",row.names=FALSE)
+    
+    ## after running TADA
+    source("DDD_randset.R")
+    dirstr <- "result/control/"
+    filename <- "../TADA_DAWN/result/TADAdenovo_control1911.csv"
+    strname <- "control1911_2"
+    TADAinput2(filename,strname,dirstr,genelist0=1)
+    
+    strname <- "control1911"
     TADAinput1(filename,strname,dirstr,genelist0=1)
 
+    
+    
     ### Nat 13772 TADA input
     ### Nat13772 all mutations and variants 
     source("Multi_net.R")
     dirstr <- "result/"
     
     filename <- c("../TADA_DAWN/result/TADAdenovo_nat8_20.csv")
-    strname <- "nat13772_0"
-    TADAinput1(filename,strname,dirstr,genelist0="")
+    #strname <- "nat13772_0"
+    #TADAinput1(filename,strname,dirstr,genelist0="")
+    strname <- "nat13772_0_2"
+    TADAinput2(filename,strname,dirstr,genelist0="")
 
     ## nature 13772 with only de novo mutations    
-    strname <- "nat13772"
-    TADAinput1(filename,strname,dirstr,genelist0=1)  
+    #strname <- "nat13772"
+    #TADAinput1(filename,strname,dirstr,genelist0=1) 
+    strname <- "nat13772_2"
+    TADAinput2(filename,strname,dirstr,genelist0=1) 
     
     ###### repeat DDD data set
     source("ASD_data_set.R")
@@ -167,8 +200,11 @@ control_data <- function(){
     dirstr <- "result/"
     
     filename <- c("../TADA_DAWN/result/TADAdenovo_repDDD_8_24.csv")
-    strname <- "repDDD"
-    TADAinput1(filename,strname,dirstr,genelist0=1)  
+    #strname <- "repDDD"
+    #TADAinput1(filename,strname,dirstr,genelist0=1)  
+    strname <- "repDDD_2"
+    TADAinput2(filename,strname,dirstr,genelist0=1)
+    
 }
 
 TADAinput2 <- function(filenames,strname,dirstr="random_samples/",pi0=0.94,genelist0=""){

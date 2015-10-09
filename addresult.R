@@ -412,10 +412,11 @@ global_map <- function(){
     a <- rep(0,8)
     for(i in 1:8){a[i] <- sum(tmp==i);}
     
-    pdf(file="plot/sparsity.pdf",width=12,height=10)
+    pdf(file="plot/sparsity_10_8.pdf",width=12,height=10)
     #hist(tmp,xlab="De novo count",ylab="The number of genes",col=2)
     par(cex.lab=1.7,cex.main=2,mai=c(2,2,1,1))
-    mp <- barplot(a,space=0.4, col=2,cex.axis=1.6,xlab="De novo count",ylab="The number of genes",main=substitute(paste("Sparsity of ", italic('de novo'), " mutations" )))
+    #mp <- barplot(a,space=0.4, col=2,cex.axis=1.6,xlab="De novo count",ylab="The number of genes",main=substitute(paste("Sparsity of ", italic('de novo'), " mutations" )))
+    mp <- barplot(a,space=0.4, col=2,cex.axis=1.6,xlab="De novo count",ylab="Number of genes",main="")
     axis(1, at=mp, labels=1:8,cex.axis=1.6)
     dev.off()   
    
@@ -448,15 +449,16 @@ global_map <- function(){
 # figure 2: power of the statistical test methods
 statis_number <- function(){
     source("Poisson_test_hq.R")
+    #filename <- "ASD/TADAdenovo_nat8_20.csv"
     filename <- "ASD/TADAresult/TADAdenovo_ASD4_16.csv"
     ntrio <- 3953
     tmp <- Poisson_test_hq(filename,ntrio)
     tmp <- tmp[order(tmp[,"min_p"]),]
-    tmp <- cbind(tmp,dim(tmp)[1]*3*tmp[,"min_p"])
+    tmp <- cbind(tmp,p.adjust(tmp[,"min_p"],method="fdr"))
     
-    mut <- read.csv("ASD/TADAresult/TADAdenovo_ASD4_16.csv")
-    
-    cutV <- seq(0.0001,0.05,0.0005)
+    mut <- read.csv("ASD/TADAdenovo_nat8_20.csv")
+    mut[is.na(mut[,"qvalue.dn"]),"qvalue.dn"] <- 1
+    cutV <- seq(0.01,0.3,0.005)
     y1 <- rep(0,length(cutV))
     y2 <- rep(0,length(cutV))
     y3=y1
@@ -465,22 +467,24 @@ statis_number <- function(){
     for(i in 1:length(cutV)){
         y1[i] <- sum(mut[,"qvalue.dn"] <= cutV[i])
         y2[i] <- sum(tmp[,19] <= cutV[i])
-        y3[i] <- sum(mut[,"pval.TADA.dn"] <= cutV[i])
-        y4[i] <- sum(tmp[,"min_p"] <= cutV[i])
+        #y3[i] <- sum(mut[,"pval.TADA.dn"] <= cutV[i])
+        #y4[i] <- sum(tmp[,"min_p"] <= cutV[i])
     }
     
     #plot
-    pdf(file="plot/statis_number.pdf",width=13,height=6)
-    par(mfrow=c(1,2))
-    plot(-log10(cutV),y1,xlab="-log10 (p-value)",ylab="Number of significant genes",ylim=c(0,max(c(y1,y2))),main="Significance genes (Corrected p-value)",type="l")
+    pdf(file="plot/statis_number.pdf",width=8,height=8)
+    par(mfrow=c(1,1),mai=c(2,1,1,1))
+    plot(-log10(cutV),y1,xlab="p-value",ylab="Number of genes",ylim=c(0,max(c(y1,y2))),main="Significant genes",type="l",xaxt="n",cex.axis=1.6,cex.lab=1.7,cex.main=2)
     lines(-log10(cutV),y2,col=2,type="l")
-    #abline(v=2)
-    legend("topright",legend=c("TADA","Poisson Test"),lwd=c(1,1),lty=c(1,1),col=1:2)
-    
-    plot(-log10(cutV),y3,xlab="-log10 (p-value)",ylab="Number of significant genes",ylim=c(0,max(c(y3,y4))),main="Significance genes (p-value)",type="l")
-    lines(-log10(cutV),y4,col=2,type="l")
-    #abline(v=2)
-    legend("topright",legend=c("TADA","Poisson Test"),lwd=c(1,1),lty=c(1,1),col=1:2)
+    #abline(v=-log10(0.05))
+    legend("topright",legend=c("TADA","Poisson Test"),lwd=c(1,1),lty=c(1,1),col=1:2,cex=1.3)
+    axis(1, at=-log10(cutV), labels=cutV,cex.axis=1.6)
+         
+#     plot(-log10(cutV),y3,xlab="p-value",ylab="Number of significant genes",ylim=c(0,max(c(y3,y4))),main="Significance genes (p-value)",type="l",xaxt="n")
+#     lines(-log10(cutV),y4,col=2,type="l")
+#     #abline(v=-log10(0.05))
+#     legend("topright",legend=c("TADA","Poisson Test"),lwd=c(1,1),lty=c(1,1),col=1:2)
+#     axis(1, at=-log10(cutV), labels=cutV)
     dev.off()
 }
 
