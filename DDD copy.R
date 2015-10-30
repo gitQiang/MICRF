@@ -112,7 +112,134 @@ DDD <- function(){
 
 DDD_mis <- function(){
 
-    ## Newest   
+    ### c("Family_ID","Gene","Type","MutaType","Disease","From")
+    ## DDD
+    filename <- "DDD_mutations/nature14135-s2/Table s2.csv" ## SNV and indels
+    deddd <- read.csv(filename)
+    dddlof <- c("frameshift_variant","inframe_deletion","inframe_insertion","splice_acceptor_variant","splice_donor_variant","splice_region_variant","stop_gained","stop_lost")
+    #dddmis <- c("3_prime_UTR_variant","downstream_gene_variant","initiator_codon_variant","intron_variant","missense_variant","regulatory_region_variant","upstream_gene_variant")
+    dddmis <- c("missense_variant")
+    #deddd <- deddd[deddd[,"Consequence"] %in% union(dddlof,dddmis),c("Chr","Pos","AAchange","Gene","Consequence")]
+    deddd <- deddd[,c("Chr","Pos","AAchange","Gene","Consequence")]
+    colnames(deddd) <- c("Chr","Pos","AAchange","Gene","Type")
+    
+    deddd[deddd[,"Type"] %in% dddlof,"MutaType"] <- "LOF"
+    deddd[deddd[,"Type"] %in% dddmis,"MutaType"] <- "MIS"
+    deddd[,"Family_ID"] <- 0
+    deddd[,"Disease"] <- "DDD"
+    deddd[,"From"] <- "nature14135_DDD"
+    deddd <- deddd[,c(1,2,3,c(4,1,2,3,5,6)+3)]
+    
+    ### ID
+    filename <- "DDD_mutations/ID/plosone/journal.pgen.1004772.s002.csv"
+    deidplos <- read.csv(filename,skip=1)
+    idplof <- c("canonical splice site","Canonical splice site","Consensus splice site","deletion","frameshift_deletion","frameshift_insertion","stopgain_SNV","nonframeshift_deletion","nonframeshift_insertion")  
+    idpmis <- c("nonsynonymous_SNV")
+    #!!!
+    deidplos[78,"Gene.symbol"] <- "PCDHGA1"
+    #deidplos <- deidplos[deidplos[,"variant.type"] %in% union(idplof,idpmis),c("Chr","Position","Detailed.annotation.of.the.variant","Family.ID","Gene.symbol","variant.type")]
+    deidplos <- deidplos[,c("Chr","Position","Detailed.annotation.of.the.variant","Family.ID","Gene.symbol","variant.type")]
+    colnames(deidplos) <- c("Chr","Pos","AAchange","Family_ID","Gene","Type")
+    deidplos[deidplos[,"Type"] %in% idplof,"MutaType"] <- "LOF"
+    deidplos[deidplos[,"Type"] %in% idpmis,"MutaType"] <- "MIS"
+    deidplos[,"Disease"] <- "ID"
+    deidplos[,"From"] <- "Hamdan et al., PLOS genetics"
+    
+    filename <- "DDD_mutations/ID/100/all.csv"
+    deid100 <- read.csv(filename)
+    deid100[is.na(deid100[,8]),8] <- ""
+    #subs <- !(deid100[,7]=="" & deid100[,8]=="" & deid100[,9]=="" & deid100[,10]=="" & deid100[,11]=="")
+    #deid100 <- deid100[subs,]
+    deid100[,"Chr"] <- sapply(1:dim(deid100)[1],function(i) unlist(strsplit(deid100[i,"V3"],"\\("))[1])
+    deid100[,"Pos"] <- sapply(1:dim(deid100)[1],function(i) unlist(strsplit(deid100[i,"V3"],"g."))[2])
+    deid100[,"AAchange"] <- deid100[,"V5"]
+    deid100[deid100[,9]=="D","MutaType"] <- "LOF"
+    deid100[deid100[,9]!="D","MutaType"] <- "MIS"
+    deid100 <- deid100[,c("Chr","Pos","AAchange","V1","V2","V3","MutaType")]
+    colnames(deid100) <- c("Chr","Pos","AAchange","Family_ID","Gene","Type","MutaType")
+    deid100[,"Type"] <- 0
+    deid100[,"Disease"] <- "ID"
+    deid100[,"From"] <- "de Ligt et al., NEJM"
+    
+    filename <- "DDD_mutations/ID/nature13394/all.csv"
+    deidna <- read.csv(filename,header=FALSE)
+    deidna[,2] <- gsub(" $", "", deidna[,2])
+    deidna[,6] <- gsub(" $", "", deidna[,6])
+    idnalof <- c("Frameshift","Insertion","Nonsense","Splice site")
+    idnamis <- "Missense"
+    #deidna <- deidna[deidna[,6] %in% union(idnalof,idnamis),c("V1","V2","V6")]
+    
+    deidna[,"Chr"] <- sapply(1:dim(deidna)[1],function(i) unlist(strsplit(deidna[i,"V3"],"\\("))[1])
+    deidna[,"Pos"] <- sapply(1:dim(deidna)[1],function(i) unlist(strsplit(deidna[i,"V3"],":"))[2])
+    deidna[,"AAchange"] <- deidna[,"V4"]
+    deidna <- deidna[,c("Chr","Pos","AAchange","V1","V2","V6")]
+    colnames(deidna) <- c("Chr","Pos","AAchange","Family_ID","Gene","Type")
+    deidna[deidna[,"Type"] %in% idnalof,"MutaType"] <- "LOF"
+    deidna[deidna[,"Type"] %in% idnamis,"MutaType"] <- "MIS"
+    deidna[,"Disease"] <- "ID"
+    deidna[,"From"] <- "nature13394"
+    
+    deID <- rbind(deidplos,deid100,deidna)
+    
+    ### EE
+    filename <- "DDD_mutations/epileptic/nature12439/all.csv" 
+    deeena <- read.csv(filename,header=FALSE)
+    deeena[,5] <- gsub(" $", "", deeena[,5])
+    deeena[,7] <- gsub(" $", "", deeena[,7])
+    eelof <- c("frameshift","inframe deletion","splice acceptor","splice donor","stop gained")
+    eemis <- c("missense","3' UTR","5' UTR","downstream","upstream","intronic") # 
+    subs1 <- deeena[,7] %in% eemis
+    subs2 <- deeena[,7] %in% eelof
+    #deeena <- deeena[subs1 | subs2,c("V1","V5","V7")]
+    deeena[,"Chr"] <- sapply(1:dim(deeena)[1],function(i) unlist(strsplit(deeena[i,"V2"],":"))[1])
+    deeena[,"Pos"] <- sapply(1:dim(deeena)[1],function(i) unlist(strsplit(deeena[i,"V2"],":"))[2])
+    deeena[,"AAchange"] <- deeena[,"V3"]
+    deeena <- deeena[,c("Chr","Pos","AAchange","V1","V5","V7")]
+    colnames(deeena) <- c("Chr","Pos","AAchange","Family_ID","Gene","Type")
+    deeena[deeena[,"Type"] %in% eelof,"MutaType"] <- "LOF"
+    deeena[deeena[,"Type"] %in% eemis,"MutaType"] <- "MIS"
+    deeena[,"Disease"] <- "EE"
+    deeena[,"From"] <- "nature12439"
+    
+    ## ASD
+    asddata <- read.csv("ASD/ASDmutationlists_all.csv")
+    colnames(asddata) <- c("Chr","Pos","AAchange","Family_ID","Disease","Type","Gene","MutaType","From")
+    
+    asddata[,"Disease"] <- "ASD"
+    
+    
+    
+    source("Network_analysis.R")
+    deddd[,"Gene"] <- mapping_to(deddd[,"Gene"])
+    deID[,"Gene"] <- mapping_to(deID[,"Gene"])
+    deeena[,"Gene"] <- mapping_to(deeena[,"Gene"])
+    #write.csv(deddd,file="DDD_mutations/datasheet/DDDmutationlist_Mis.csv",row.names=FALSE)
+    #write.csv(deID,file="DDD_mutations/datasheet/IDmutationlist_Mis.csv",row.names=FALSE)
+    #write.csv(deeena,file="DDD_mutations/datasheet/EEmutationlist_Mis.csv",row.names=FALSE)
+    
+    ALLde <- rbind(deddd,deID,deeena,asddata)
+    write.csv(ALLde,file="DDD_mutations/datasheet/ALLdemutationlist_all.csv",row.names=FALSE)
+    
+    #write.csv(ALLde,file="DDD_mutations/datasheet/ALLdemutationlist_Mis.csv",row.names=FALSE)
+    
+    mutrate <- read.csv("ASD/MutationRatem.csv")
+    
+    ta <- Random_DDD(deddd,mutrate)
+    write.csv(ta,file="DDD_mutations/datasheet/DDDcounttable_Mis.csv",row.names=FALSE)
+    
+    ta <- Random_DDD(deID,mutrate)
+    write.csv(ta,file="DDD_mutations/datasheet/IDcounttable_Mis.csv",row.names=FALSE)
+    
+    ta <- Random_DDD(deeena,mutrate)
+    write.csv(ta,file="DDD_mutations/datasheet/EEcounttable_Mis.csv",row.names=FALSE)
+    
+    ta <- Random_DDD(ALLde,mutrate)
+    write.csv(ta,file="DDD_mutations/datasheet/ALLdecounttable_Mis.csv",row.names=FALSE)
+    
+    ta <- Random_DDD(asddata,mutrate)
+    write.csv(ta,file="DDD_mutations/datasheet/ASDcounttable_Mis.csv",row.names=FALSE)
+    
+    
     ###========================================================###    
     ### wannovar
     options(stringsAsFactors=FALSE)
@@ -963,13 +1090,6 @@ clear_ncounttable <- function(){
     
     tmp <- clear_number_metaSVM("DDD_mutations/datasheet/anno_mutationlist_control.csv")
     write.table(tmp,file="DDD_mutations/datasheet/control_mutation_table1.txt",quote=FALSE,sep="\t")
-    
-    tmp <- clear_number_metaSVM("data/PCGCdata/anno_mutationlist_control.csv")
-    write.csv(tmp,file="data/PCGCdata/control_mutation_table1.csv")
-    
-    tmp <- clear_number_metaSVM("data/PCGCdata/anno_mutationlist_case.csv")
-    write.csv(tmp,file="data/PCGCdata/case_mutation_table1.csv")
-    ## write.table(tmp,file="data/PCGCdata/case_mutation_table1.txt",quote=FALSE,sep="\t")
 }
 
 clear_number_metaSVM <- function(filename){
@@ -1020,8 +1140,8 @@ clear_number <- function(filename){
 
 }
 
-metana_case_control <- function(){
-    ### meta-ana
+metana <- function(){
+
     source("ASD_data_set.R")
     mutrate0 <- read.csv("ASD/GeneMutaRatem.csv")
     mutrate1 <- read.csv("ASD/MutationRatem.csv")
@@ -1030,13 +1150,6 @@ metana_case_control <- function(){
     
     data <- read.csv("DDD_mutations/datasheet/mutation_4_15_table1.csv",skip=1)
     data <- data[,c(1,14:17)]
-    data1 <- read.csv("DDD_mutations/datasheet/DDDmutation_4_15_table1.csv",skip=1)
-    genes <- intersect(data[,1],data1[,1])
-    data[match(genes,data[,1]),2:5] <- data[match(genes,data[,1]),2:5] + data1[match(genes,data1[,1]),2:5]
-    subs <- !(data1[,1] %in% genes)
-    colnames(data) <- colnames(data1)
-    data <- rbind(data,data1[subs,])
-    
     subs <- data[,1] %in% mutrate[,1]
     data <- data[subs,]
     subs <- match(data[,1],mutrate[,1])
@@ -1054,60 +1167,19 @@ metana_case_control <- function(){
     write.csv(tmp,file="DDD_mutations/datasheet/Ptest_4_22.csv",row.names=FALSE)
     
     
-    source("DDD.R")
-    ### control ========================    
-    filename= "data/PCGCdata/control_mutation_table1.csv"
-    wfile = "data/PCGCdata/control_ana.csv"
-    control_cases_1(filename,wfile)
-    
-    ### PCGC =======================
-    filename ="data/PCGCdata/case_mutation_table1.csv"
-    wfile ="data/PCGCdata/case_ana.csv"
-    control_cases_1(filename,wfile)
-
-    
-}
-
-Clear_control_PCGC <- function(){
-    
-    source("DDD.R")
-    ##### Control data
-    control_cases("data/PCGCdata/controls_denovo_info0505.csv", "data/PCGCdata/anno_mutationlist_control.csv")
-    
-    ##### PCGC data 
-    control_cases("data/PCGCdata/cases_denovo_info0505.csv","data/PCGCdata/anno_mutationlist_case.csv")
-    
-}
-
-control_cases <- function(filename, wfile){
-    
-    reann <- read.csv(filename)
-    reall <- reann[,c("chr","pos","pos","ref","alt","gene_name","type","Blinded.ID","protein.change","metaSVM_prd","class")]
-    reall[,"Disease"] <- "Control"
-    reall[,"From"] <- "SSC"
-    colnames(reall) <- c("Chr","Start","End","Ref","Alt","Gene","Category","sampleID","AAchanges","RadialSVM_pred_metaSVM","class","Disease","From")
-    
-    reall[reall[,"class"]=="LGD","mutation_type_metaSVM"] <- "LOF"
-    reall[reall[,"class"]=="D-mis","mutation_type_metaSVM"] <- "dMIS"
-    reall[reall[,"class"]=="B-mis","mutation_type_metaSVM"] <- "MIS"
-    reall[reall[,"class"]=="silent","mutation_type_metaSVM"] <- "SYNONMOUS"
-    reall[reall[,"class"]=="protein-altering","mutation_type_metaSVM"] <- "Other"
-    reall[reall[,"class"]=="unknown","mutation_type_metaSVM"] <- "unknown"
-    
-    write.csv(reall,file=wfile,row.names=FALSE)
-}
-
-control_cases_1 <- function(filename,wfile){
+    ### control =========================
+    source("ASD_data_set.R")
     mutrate0 <- read.csv("ASD/GeneMutaRatem.csv")
     mutrate1 <- read.csv("ASD/MutationRatem.csv")
     mutrate <- cbind(mutrate0,mutrate1[match(mutrate0[,1],mutrate1[,1]),"mut.rate"])
     colnames(mutrate)[6] <- "mut.rate"
     
-    data <- read.csv(filename)
+    data <- read.csv("DDD_mutations/datasheet/control_mutation_table1.csv",skip=1)
     subs <- data[,1] %in% mutrate[,1]
     data <- data[subs,]
     subs <- match(data[,1],mutrate[,1])
     data1 <- cbind(data[,1],mutrate[subs,2:6],data[,2:5])
     colnames(data1) <- c("Gene","dmis","mis","LOF","LOFDmis","mut.rate","dn.LoF","dn.mis3","dn.mis","dn.syn")
-    write.csv(data1,file=wfile,row.names=FALSE)
+    write.csv(data1,file="DDD_mutations/datasheet/control_ana.csv",row.names=FALSE)
+    
 }

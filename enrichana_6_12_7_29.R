@@ -18,7 +18,7 @@ randset_1_AUC_6_3 <- function(){
 #     geneDAWN <- intersect(genes,tmp[!is.na(tmp[,"FDR"]),"Gene"])
 #     tmp <- new_auc(filenames,allP,geneDAWN,flag=2,iplot=FALSE);
     
-    DAWNflag <- 0 ## dawnflag=0 for AUC_7_29 only networks overlapped nodes; dawnflag=1 for AUC_7_24 (overlapped networks and methods); all_7_29 for all genes not limited by any networks and methods
+    DAWNflag <- 0 ## dawnflag=0 for AUC_7_29 dawnflag=1 for AUC_7_24
     DAWNnames <-  readLines(con <- file("result/randresult_1/DAWN/TADAdenovo_randset_1.txt","r"))   
     close(con)
     Maginames <-  readLines(con <- file("result/randresult_1/MAGI/MAGIfilenames.txt","r"))   
@@ -105,31 +105,22 @@ randset_1_AUC_6_3 <- function(){
     for(i in subs){
         y <- rowMeans(AUC[,,i])
         sd <- apply( AUC[,,i], 1, sd)/2 
-        plot_err(x[1:5],y[1:5],sd,i,main,xlab,ylab,ylim=c(0,ymax),xlim=c(0.15,0.62),cols=cols)
+        plot_err(x[1:5],y[1:5],sd,i,main,xlab,ylab,ylim=c(0,ymax),xlim=c(0.05,0.62),cols=cols)
         Y1[k] <- y[1]
         k <- k+1
-    } 
-    Y2 <- round(Y1*100)/100
-#     ty <- -sort(-unique(Y2))
-#     labels <- rep("",length(ty))
-#     k=1
-#     for(i in 1:length(ty)){
-#         tmp <- sum(Y2==ty[i])
-#         labels[i] <- paste(k:((k+tmp)-1),sep="",collapse=",")
-#         k <- k + tmp
-#     }
-    labels <- c("1","2,","3,","4","5","6,","7","8,","9,","10","11,","12","13")
-    tx <- c(0.2,0.173,0.185,0.193,0.2,0.193,0.2,0.178,0.188,0.2,0.185,0.2,0.2)
-    ty <- -sort(-Y2)
-    ty[11:12] <- mean(ty[11:12])
-    ty[8:9] <- ty[10]
-    ty[6:7] <- ty[6:7] + 0.006
-    ty[1] <- ty[1] + 0.01
-    ords <- sort(-Y1,index.return=T)$ix
-    text(tx,ty,labels=labels,pos=2,col=cols[ords],cex=1.3)
+    }
+    Y1[2] <- Y1[2] - 0.002
+    Y1[13] <- Y1[13] + 0.001
+    Y1[7] <- Y1[7] - 0.005
+    #Y1[10] <- Y1[10] + 0.002
+    #Y1[9] <- Y1[9] + 0.003
+    Y1[4] <- Y1[4] - 0.002
+    Y1[5] <- Y1[5] - 0.001
+    Y1[3] <- Y1[3] - 0.002
+    text(rep(0.2,length(nn)),Y1,labels=legend[subs],pos=2,col=cols,cex=1.2)
     
-    #ords <- c(1,2,3,4,7,5,8,6,9,12,10,13,11)
-    legend("bottomright",col=cols[ords],legend=paste(subs,legend[ords],sep=":"),lty=rep(1,length(subs)),lwd=rep(2,length(subs)),cex=1.5,y.intersp=1)
+    ords <- c(1,2,3,4,7,5,8,6,9,12,10,13,11)
+    legend("bottomright",col=cols[subs[ords]],legend=legend[subs[ords]],lty=rep(1,length(subs)),lwd=rep(2,length(subs)),cex=1.2,y.intersp=0.8)
 
     dev.off()
 
@@ -228,20 +219,19 @@ batch_randset4_6_2 <- function(){
 
 batch_randset4_7_22 <- function(){
     source("enrichana_6_12.R")
-    betaV <- c(0,0.2,0.4,0.5,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0)
+    betaV <- c(0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0)
     nmeth <- 4
     
     TPcut=0.1
-    TADAFile <- "../TADA_DAWN/result/TADAdenovo_meta_dmis.csv"
+    TADAFile <- "ASD/TADAresult/TADAdenovo_ASD4_16.csv"
     asdall <- read.csv(TADAFile)
-    asdall[is.na(asdall[,"qvalue.dn"]),"qvalue.dn"] <- 1
-    Tset <- asdall[asdall[,"qvalue.dn"]< TPcut,1]
+    Tset <- asdall[asdall[,"qvalue.dn"]<=TPcut,1]
     
-    netstr <- c("STRING/","iRef/","coexp/","HPRD/","coexp1/","corr/","coexp5/","coexp7/")
-    netflags <- c(31,6,7,20,21,26,27,28)
-    nodeN <- c(12969,12124,9448,10526,8782,9801,17587,17587)
+    netstr <- c("STRING/","iRef/","coexp/","HPRD/","coexp1/")
+    netflags <- c(31,6,7,20,21)
+    nodeN <- c(12969,12124,9448,10526,8782)
     
-    PerM <- array(0,c(8,4,12))
+    PerM <- array(0,c(5,4,12))
     for(netflag in netflags){
         for(meth in 1:nmeth){
             for(beta in betaV){
@@ -249,8 +239,7 @@ batch_randset4_7_22 <- function(){
                 netsub <- which(netflags==netflag)
                 ## recurrent
                 path <- paste("result/randresult4_",meth,"/",netstr[netsub],sep="")
-                ReM <- matrix(0,20,nodeN[netsub])
-                ReM <- randset4_one(netflag,meth,beta,path,ReM)
+                ReM <- randset4_one(netflag,meth,beta,path)
                 ReV <- colMeans(ReM)
                 
                 ## leave-one rank
@@ -265,21 +254,32 @@ batch_randset4_7_22 <- function(){
         }
     } 
     
-    save(PerM,file="PerM_8_13")
-
-    BestP <- matrix(0,8,3)
-    for(i in 1:8){
+    save(PerM,file="PerM_7_24")
+    
+    BestP <- matrix(0,5,3)
+    for(i in 1:5){
         BestP[i,1] <- netflags[i]
         tmp <- which(PerM[i,,]==max(PerM[i,,]),arr.ind=TRUE)
         BestP[i,2] <- tmp[1]
         BestP[i,3] <- betaV[tmp[2]]
     }
-    save(BestP,file="BestP_8_13")
-
+    save(BestP,file="BestP_7_24")
+    
+    load("PerM_6_10")
+    PerM0 <- array(0,c(5,4,12))
+    PerM0[1:3,,] <- PerM[c(1,2,4),,]
+    rm(PerM)
+    load("PerM_7_23_1")
+    PerM0[4:5,,] <- PerM[4:5,,]
+    rm(PerM)
+    PerM <- PerM0
+    
+    
 }
 
-randset4_one <- function(netflag,meth,beta,path,ReM){
+randset4_one <- function(netflag,meth,beta,path){
     
+    ReM <- matrix(0,20,nodeN[netsub])
     for(i in 1:20){
         filename <- paste(path,"CRFresult_",beta,"part3_",i,"LBP_",netflag,".txt",sep="")
         ReM[i,] <- one_recurrent(filename,i)
@@ -700,10 +700,10 @@ plot_err <- function(x,y,sd,flag=1,main="ROC",xlab="Samples",ylab="AUC",xlim=c(0
     
     if(flag==1){
         par(mar=c(6,6,3,2))
-        plot(x, y,xaxt="n", type="b",col=cols[flag], main=main, ylab=ylab,xlab=xlab,xlim=xlim,ylim=ylim,cex.lab=2,cex.main=2,lwd=2,cex.axis=1.8)
+        plot(x, y,xaxt="n", type="b",col=cols[flag], main=main, ylab=ylab,xlab=xlab,xlim=xlim,ylim=ylim,cex.lab=2,cex.main=2,lwd=3,cex.axis=1.8,pch=10)
         axis(1,at=seq(0.2,0.9,0.1)[1:length(x)],labels=floor(3953*seq(0.2,0.9,0.1))[1:length(x)],font=1,cex.axis=1.5)
     }else{
-        lines(x, y, type="b",col=cols[flag],xaxt="n",lwd=2)
+        lines(x, y, type="b",col=cols[flag],xaxt="n",lwd=3)
     }
     
     #axis(2,at=seq(ylim[1],ylim[2],0.1))

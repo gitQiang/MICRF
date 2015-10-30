@@ -2,20 +2,18 @@
 plot_AUC <- function(){
     ## plot auc values
     ## Figure 1: AUC values for eight random sets
+
+    #cols <- c("black","red","green","aquamarine3","bisque4","blueviolet","brown","chartreuse","chocolate4","cyan","coral4","aquamarine3","bisque4","blueviolet","brown","chartreuse","chocolate4","cyan","coral4")
+    #legend <- c("TADA","DAWN","MAGI","RWR-STRING","RWR-iRef","RWR-coexp","RWR-HPRD","RWR-corr","RWR-corr1","RWR-coexp5","RWR-coexp7","MICRF-STRING","MICRF-iRef","MICRF-coexp","MICRF-HPRD","MICRF-corr","MICRF-corr1","MICRF-coexp5","MICRF-coexp7")
     
-    aucfile="AUC_10_8_2"
+    aucfile="AUC_10_7"
     aucf="plot/samplesize10_8.pdf"
     source("enrichana_6_12.R")
     load(aucfile)
     
-    pdf(file=aucf,width=12,height=10)
-    #cols <- c("black","red","green","aquamarine3","bisque4","blueviolet","brown","chartreuse","chocolate4","cyan","coral4","aquamarine3","bisque4","blueviolet","brown","chartreuse","chocolate4","cyan","coral4")
     cols <- c("black","red","green","mediumorchid1","orchid","blueviolet","brown","chartreuse","chocolate4","cyan","coral4","orangered","blue","blue","darkslategray1","","chocolate4","coral4","")
-    #legend <- c("TADA","DAWN","MAGI","RWR-STRING","RWR-iRef","RWR-coexp","RWR-HPRD","RWR-corr","RWR-corr1","RWR-coexp5","RWR-coexp7","MICRF-STRING","MICRF-iRef","MICRF-coexp","MICRF-HPRD","MICRF-corr","MICRF-corr1","MICRF-coexp5","MICRF-coexp7")
-    
-    #subs <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19)
-    cols <- cols[c(1,2,3,4,5,7,9,10,12,13,15,17,18)]
     subs <- c(1,2,3,4,5,7,9,10,12,13,15,17,18)
+    #cols <- cols[subs]
     nn <- subs
     nmeth=length(subs)
     legend <- c("TADA","DAWN","MAGI","RWR-STRING","RWR-iRef","RWR-HPRD","RWR-corr","RWR-coexp","MICRF-STRING","MICRF-iRef","MICRF-HPRD","MICRF-corr","MICRF-coexp")
@@ -28,11 +26,21 @@ plot_AUC <- function(){
     x <- seq(0.2,0.9,0.1)
     Y1 <- rep(0,nmeth)
     
+    pdf(file=aucf,width=12,height=10)
     k=1
     for(i in subs){
         y <- rowMeans(AUC[,,i])
-        sd <- apply( AUC[,,i], 1, sd)/2 
-        plot_err(x[1:5],y[1:5],sd,i,main,xlab,ylab,ylim=c(0,ymax),xlim=c(0.15,0.62),cols=cols)
+        sd <- apply( AUC[,,i], 1, sd)/2
+        
+        x <- x[1:5]
+        y <- y[1:5]
+        if(i==1){
+            par(mar=c(6,6,3,2))
+            plot(x, y,xaxt="n", type="b",col=cols[i], main=main, ylab=ylab,xlab=xlab,xlim=c(0.16,0.12+length(x)/10),ylim=c(0,1),cex.lab=2,cex.main=2,lwd=2,cex.axis=1.8)
+            axis(1,at=seq(0.2,0.9,0.1)[1:length(x)],labels=floor(5542*seq(0.2,0.9,0.1))[1:length(x)],font=1,cex.axis=1.5)
+        }else{
+            lines(x, y, type="b",col=cols[i],xaxt="n",lwd=2)
+        }
         Y1[k] <- y[1]
         k <- k+1
     } 
@@ -40,16 +48,8 @@ plot_AUC <- function(){
     labels <- 1:length(nn)
     
     tx <- c(0.193,0.2,0.193,0.2,0.193,0.2,0.193,0.2,0.188,0.2,0.2)
-    ty <- -sort(-Y2)
+    ty <- sort(Y2,decreasing = TRUE)
     #ty[5] = ty[6] + 0.001
-    #ty[6] = ty[6] + 0.001
-    #ty[3] = ty[3] - 0.01
-#     ty[1] = ty[1] + 0.01
-#     ty[4] = ty[4] + 0.01
-#     ty[6] = ty[6] - 0.01
-#     ty[11] = ty[11] - 0.01
-#     ty[12] = ty[12] - 0.01
-    
     cols <- cols[subs]
     ords <- sort(-Y1,index.return=T)$ix
     text(tx,ty,labels=labels,pos=2,col=cols[ords],cex=1.3)
@@ -65,7 +65,7 @@ getAUC <- function(j){
     
     source("enrichana_6_12.R")
     TADAFile="../TADA_DAWN/result/TADAdenovo_meta_dmis.csv"
-    Tset <- allPf(TPcut=0.1,TADAFile)
+    Tset <- allPf(TPcut=0.3,TADAFile)
     
     DAWNnames <-  readLines(con <- file("../TADA_DAWN/DAWN_package/TADAdenovo_randset_1.txt","r"))   
     close(con)
@@ -91,7 +91,7 @@ getAUC <- function(j){
         AUC0[i,] <- tmp$auc
     }
     
-    save(AUC0,file=paste("AUC_10_8",j,DAWNflag,sep="_"))
+    save(AUC0,file=paste("AUC_10_9",j,DAWNflag,sep="_"))
         
 }
 
@@ -102,11 +102,11 @@ dealAUC <- function(){
     AUC <- array(0,dim=c(8,20,19)) 
     for(j in 2:9){
         #load(paste("AUC_10_7_",j,sep="_"))
-        load(paste("AUC_10_8",j,DAWNflag,sep="_"))
+        load(paste("AUC_10_9",j,DAWNflag,sep="_"))
         AUC[j-1,,] <- AUC0
     }
     
-    save(AUC,file=paste("AUC_10_8",DAWNflag,sep="_"))
+    save(AUC,file=paste("AUC_10_9",DAWNflag,sep="_"))
 
 }
 
@@ -230,14 +230,17 @@ best_performance_6_11 <- function(){
     
     ### plot figures ===================================
     load("ReM_10_8")
-    pdf(file="plot/recurr_10_7.pdf",width=10,height=7)
+    pdf(file="plot/recurr_10_7.pdf",width=12,height=7)
     #subs <- c(1,2,3,4,9,7,12,5,10,8,13,6,11)
     subs <- c(1,2,3,4,9,5,10,6,11,7,12,8,13)
     #subs <- c(1,2,3,4,9,5,10,6,11,8,13)
     par(mai=c(2.3,1,1,1))
     cols <- c("red","green","dodgerblue","orange","orange","yellow","yellow","pink","pink","cyan","cyan","purple","purple")
     legend=c("TADA","DAWN","MAGI","RWR-STRING","RWR-iRef","RWR-HPRD","RWR-corr","RWR-coexp","MICRF-STRING","MICRF-iRef","MICRF-HPRD","MICRF-corr","MICRF-coexp")
-    boxplot(ReM[,subs],col=cols,names=legend[subs],las=2,ylab="Fraction of recurrent genes",cex.axis=1.5,cex.lab=1.7,cex.names=2,outline=FALSE)
+    #boxplot(ReM[,subs],col=cols,names=legend[subs],las=2,ylab="Fraction of recurrent genes",cex.axis=1.5,cex.lab=1.7,cex.names=2,outline=FALSE)
+    boxplot(ReM[,subs],col=cols,ylab="Fraction of recurrent genes",cex.axis=1.5,cex.lab=1.7,cex.names=0,outline=FALSE, axisnames = FALSE,xaxt="n")
+    axis(1,at=1:length(cols),labels=FALSE)
+    text(1:length(cols), par("usr")[3], labels = legend[subs], srt = 45, adj = c(1.1,1.1), xpd = TRUE,cex=1.7)
     abline(h=median(ReM[,subs[1]]),lty=2)
     dev.off()
     
@@ -373,14 +376,18 @@ leaveone_recurrent <- function(){
     
     ### plot figures
     load("nLeo_10_7")
-    pdf(file="plot/leaveone_10_7.pdf",width=10,height=10)
+    pdf(file="plot/leaveone_10_7.pdf",width=15,height=10)
     par(mai=c(4,2,2,2))
     legend <- c("TADA","DAWN","MAGI","RWR-STRING","RWR-iRef","RWR-HPRD","RWR-corr","RWR-coexp","MICRF-STRING","MICRF-iRef","MICRF-HPRD","MICRF-corr","MICRF-coexp")
     ords <- c(1,2,3,4,9,5,10,6,11,7,12,8,13)
     #ords <- c(1,2,3,4,9,5,10,6,11,8,13)
     #cols <- c("red","green","blue","orange","orange","yellow","yellow","pink","pink","cyan","cyan","purple","purple")
+    #barplot(t(nLeo)[,ords], names.arg=legend[ords], beside=T, ylab="#gold risk genes",cex.names=1.5, las=2, ylim=c(0,max(nLeo)), col=c("red","darkblue"),cex.lab=1.5,cex.axis=1.25)
     
-    barplot(t(nLeo)[,ords], names.arg=legend[ords], beside=T, ylab="#gold risk genes",cex.names=1.5, las=2, ylim=c(0,max(nLeo)), col=c("red","darkblue"),cex.lab=1.5,cex.axis=1.25)
+    mp <- barplot(t(nLeo)[,ords], beside=T, ylab="#gold risk genes",cex.names=1.5, las=2, ylim=c(0,max(nLeo)), col=c("red","darkblue"),cex.lab=1.5,cex.axis=1.25,axes = FALSE, axisnames = FALSE)
+    #mp <- barplot(1:12, axes = FALSE, axisnames = FALSE)
+    text(colMeans(mp), par("usr")[3], labels = legend[ords], srt = 45, adj = c(1.1,1.1), xpd = TRUE,cex=1.5)
+    axis(2)
     legend("topleft",legend=c("DDD case","SSC control"),cex=1.3,fill=c("red","darkblue")) 
     dev.off()    
     

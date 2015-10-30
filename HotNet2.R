@@ -237,8 +237,6 @@ HotNet2R <- function(netflag,strn,filenames,fileexp,dirstr,cutn,idm=FALSE){
     allnet$matrix[allnet$matrix > 0] <- 1
     
     nodeinfo <- as.matrix(read.table(filenames[1]))
-    ## deal with NA
-    nodeinfo[is.na(nodeinfo[,2]),2] <- 0
     POSpro <- build_rwr(nodeinfo,allnet,netflag,strn,dirstr,cutn)
     
     if(idm){

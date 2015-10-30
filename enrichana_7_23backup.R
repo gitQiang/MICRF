@@ -2,7 +2,7 @@ randset_1_AUC_6_3 <- function(){
     
     source("enrichana_6_12.R")
     
-    load("BestP_7_24")
+    load("BestP_6_10")
     betaV <- BestP[,3]
     filenames <- filenamesf(0,0,betaV=betaV,"","")
     allP <- allPf(TPcut=0.1)
@@ -18,7 +18,7 @@ randset_1_AUC_6_3 <- function(){
 #     geneDAWN <- intersect(genes,tmp[!is.na(tmp[,"FDR"]),"Gene"])
 #     tmp <- new_auc(filenames,allP,geneDAWN,flag=2,iplot=FALSE);
     
-    DAWNflag <- 0 ## dawnflag=0 for AUC_7_29 only networks overlapped nodes; dawnflag=1 for AUC_7_24 (overlapped networks and methods); all_7_29 for all genes not limited by any networks and methods
+    DAWNflag <- 1
     DAWNnames <-  readLines(con <- file("result/randresult_1/DAWN/TADAdenovo_randset_1.txt","r"))   
     close(con)
     Maginames <-  readLines(con <- file("result/randresult_1/MAGI/MAGIfilenames.txt","r"))   
@@ -29,7 +29,7 @@ randset_1_AUC_6_3 <- function(){
     par(mai=c(1.2,1.2,1,1))
     j=2
     i=20
-    subs =  c(1,9:13)
+    subs =  c(1,10,11)
     filenames <- filenamesf(j,i,betaV=betaV,DAWNnames,Maginames)
     #tmp <- gene_select(filenames[subs],Tset)
     tmp <- gene_select(filenames,Tset)
@@ -76,9 +76,9 @@ randset_1_AUC_6_3 <- function(){
         }
     }
     
-    save(AUC,file="AUC_m_7_29")
-    save(TPR,file="TPR_m_7_29")
-    save(FPR,file="FRP_m_7_29")
+    save(AUC,file="AUC_m_6_11")
+    save(TPR,file="TPR_m_6_11")
+    save(FPR,file="FRP_m_6_11")
     
     ## plot auc values
     ## Figure 1: AUC values for eight random sets
@@ -86,11 +86,12 @@ randset_1_AUC_6_3 <- function(){
     #nmeth <- length(filenames)
 
     nmeth=13
-    pdf(file="plot/samplesize.pdf",width=12,height=10)    
-
-    load("AUC_m_7_24")
-    cols <- c("black","red","red","orange","green","blue","blue","orange","yellow4","violet","green","coral","violet")
-    legend <- c("TADA","DAWN","MAGI","RWR-STRING","RWR-iRef","RWR-coexp","RWR-HPRD","RWR-corr","MICRF-STRING","MICRF-iRef","MICRF-coexp","MICRF-HPRD","MICRF-corr")
+    pdf(file="plot/AUCs6_112.pdf",width=10,height=12)
+    
+    load("AUC_m_6_11")
+    cols <- 1:13 #c("Black","Blue","Cyan","Brown","Coral","DarkViolet","Green","HotPink","Orange","Plum","deeppink")
+    labels <- c("TADA","DAWN","MAGI","RWR-STRING","RWR-iRef","RWR-coexp","RWR-Infer","RWR-GNAT","MICRF-STRING","MICRF-iRef","MICRF-coexp","MICRF-Infer","MICRF-GNAT")
+    legend <- c("TADA","DAWN","MAGI","RWR-STRING","RWR-iRef","RWR-coexp","RWR-Infer","RWR-GNAT","MICRF-STRING","MICRF-iRef","MICRF-coexp","MICRF-Infer","MICRF-GNAT")
     
     main="AUC performance for different trios"
     xlab="The number of trios";ylab="AUC";
@@ -98,67 +99,56 @@ randset_1_AUC_6_3 <- function(){
     ymint <- min(AUC);ymaxt <- max(AUC);
     ymin=max(min(ymint)+0.1,0);ymax = min(ymaxt+0.1,1);
     x <- seq(0.2,0.9,0.1)
+    
     Y1 <- rep(0,nmeth)
-    subs <- 1:nmeth
-    nn <- subs
-    k=1
-    for(i in subs){
+    
+    nn <- nmeth  ##!!!!!
+    
+    for(i in 1:nn){
         y <- rowMeans(AUC[,,i])
         sd <- apply( AUC[,,i], 1, sd)/2 
-        plot_err(x[1:5],y[1:5],sd,i,main,xlab,ylab,ylim=c(0,ymax),xlim=c(0.15,0.62),cols=cols)
+        plot_err(x,y,sd,i,main,xlab,ylab,ylim=c(ymin,ymax),xlim=c(-0.05,0.95))
+        Y1[i] <- y[1]
+    }
+    text(rep(0.2,nn),Y1,labels=labels[1:nn],pos=2,col=cols,cex=1.5)
+    legend("bottomright",col=cols[1:nmeth],legend=legend[1:nn],lty=rep(1,nmeth),lwd=rep(2,nmeth),cex=1.2,y.intersp=0.8)
+    
+    dev.off()
+    
+    #### selected plot
+    nmeth=7
+    subs <- c(1,2,3,6,8,11,13)
+    pdf(file="plot/AUCs6_112.pdf",width=10,height=12)
+    
+    load("AUC_m_6_11")
+    cols <- 1:13 #c("Black","Blue","Cyan","Brown","Coral","DarkViolet","Green","HotPink","Orange","Plum","deeppink")
+    labels <- c("TADA","DAWN","MAGI","RWR-STRING","RWR-iRef","RWR-coexp","RWR-Infer","RWR-GNAT","MICRF-STRING","MICRF-iRef","MICRF-coexp","MICRF-Infer","MICRF-GNAT")
+    legend <- c("TADA","DAWN","MAGI","RWR-STRING","RWR-iRef","RWR-coexp","RWR-Infer","RWR-GNAT","MICRF-STRING","MICRF-iRef","MICRF-coexp","MICRF-Infer","MICRF-GNAT")
+    
+    main="AUC performance for different trios"
+    xlab="The number of trios";ylab="AUC";
+    ymint <- 1;ymaxt <- 0;
+    ymint <- min(AUC);ymaxt <- max(AUC);
+    ymin=max(min(ymint)+0.1,0);ymax = min(ymaxt+0.1,1);
+    x <- seq(0.2,0.9,0.1)
+    
+    Y1 <- rep(0,nmeth)
+    
+    nn <- subs ###1:nmeth
+    
+    k=1
+    for(i in nn){
+        y <- rowMeans(AUC[,,i])
+        sd <- apply( AUC[,,i], 1, sd)/2 
+        plot_err(x,y,sd,k,main,xlab,ylab,ylim=c(ymin,ymax),xlim=c(-0.05,0.95))
         Y1[k] <- y[1]
         k <- k+1
-    } 
-    Y2 <- round(Y1*100)/100
-#     ty <- -sort(-unique(Y2))
-#     labels <- rep("",length(ty))
-#     k=1
-#     for(i in 1:length(ty)){
-#         tmp <- sum(Y2==ty[i])
-#         labels[i] <- paste(k:((k+tmp)-1),sep="",collapse=",")
-#         k <- k + tmp
-#     }
-    labels <- c("1","2,","3,","4","5","6,","7","8,","9,","10","11,","12","13")
-    tx <- c(0.2,0.173,0.185,0.193,0.2,0.193,0.2,0.178,0.188,0.2,0.185,0.2,0.2)
-    ty <- -sort(-Y2)
-    ty[11:12] <- mean(ty[11:12])
-    ty[8:9] <- ty[10]
-    ty[6:7] <- ty[6:7] + 0.006
-    ty[1] <- ty[1] + 0.01
-    ords <- sort(-Y1,index.return=T)$ix
-    text(tx,ty,labels=labels,pos=2,col=cols[ords],cex=1.3)
-    
-    #ords <- c(1,2,3,4,7,5,8,6,9,12,10,13,11)
-    legend("bottomright",col=cols[ords],legend=paste(subs,legend[ords],sep=":"),lty=rep(1,length(subs)),lwd=rep(2,length(subs)),cex=1.5,y.intersp=1)
-
-    dev.off()
-
-}
-
-randset_1_AUC_7_29 <- function(){
-    source("enrichana_6_12.R")
-    
-    load("BestP_7_24")
-    betaV <- BestP[,3]
-    filenames <- filenamesf(0,0,betaV=betaV,"","")
-    Tset <- allPf(TPcut=0.1)
-  
-    DAWNnames <-  readLines(con <- file("result/randresult_1/DAWN/TADAdenovo_randset_1.txt","r"))   
-    close(con)
-    Maginames <-  readLines(con <- file("result/randresult_1/MAGI/MAGIfilenames.txt","r"))   
-    close(con)
-    
-    nnet <- 5
-    AUC <- array(0,dim=c(8,20,3+nnet*2)) 
-    for(j in 2:9){
-        for(i in 1:20){   
-            filenames <- filenamesf(j,i,betaV=betaV,DAWNnames,Maginames)
-            tmp <- new_auc_7_29(filenames,Tset)
-            AUC[j-1,i,] <- tmp
-        }
     }
+    text(rep(0.2,nmeth),Y1,labels=labels[nn],pos=2,col=cols[1:nmeth],cex=1.5)
+    legend("bottomright",col=cols[1:nmeth],legend=legend[nn],lty=rep(1,nmeth),lwd=rep(2,nmeth),cex=1.2,y.intersp=0.8)
     
-    save(AUC,file="AUC_all_7_29")
+    dev.off()
+    
     
 }
 
@@ -213,7 +203,7 @@ batch_randset4_6_2 <- function(){
             }
         }
     } 
-    save(PerM,file="PerM_7_23")
+    save(PerM,file="PerM_6_10")
     
     BestP <- matrix(0,5,3)
     for(i in 1:5){
@@ -223,34 +213,32 @@ batch_randset4_6_2 <- function(){
         BestP[i,3] <- betaV[tmp[2]]
     }
     BestP <- BestP[c(1,2,4,3,5),]
-    save(BestP,file="BestP_7_23")
+    save(BestP,file="BestP_6_10")
 }
 
 batch_randset4_7_22 <- function(){
     source("enrichana_6_12.R")
-    betaV <- c(0,0.2,0.4,0.5,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0)
+    betaV <- c(0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0)
     nmeth <- 4
     
     TPcut=0.1
-    TADAFile <- "../TADA_DAWN/result/TADAdenovo_meta_dmis.csv"
+    TADAFile <- "ASD/TADAresult/TADAdenovo_ASD4_16.csv"
     asdall <- read.csv(TADAFile)
-    asdall[is.na(asdall[,"qvalue.dn"]),"qvalue.dn"] <- 1
-    Tset <- asdall[asdall[,"qvalue.dn"]< TPcut,1]
+    Tset <- asdall[asdall[,"qvalue.dn"]<=TPcut,1]
     
-    netstr <- c("STRING/","iRef/","coexp/","HPRD/","coexp1/","corr/","coexp5/","coexp7/")
-    netflags <- c(31,6,7,20,21,26,27,28)
-    nodeN <- c(12969,12124,9448,10526,8782,9801,17587,17587)
+    netstr <- c("STRING/","iRef/","coexp/","HPRD/","coexp1/")
+    netflags <- c(31,6,7,20,21)
+    nodeN <- c(12969,12124,9448,10526,8782)
     
-    PerM <- array(0,c(8,4,12))
+    PerM <- array(0,c(5,4,12))
     for(netflag in netflags){
-        for(meth in 1:nmeth){
+        for(meth in 4){
             for(beta in betaV){
                 
                 netsub <- which(netflags==netflag)
                 ## recurrent
                 path <- paste("result/randresult4_",meth,"/",netstr[netsub],sep="")
-                ReM <- matrix(0,20,nodeN[netsub])
-                ReM <- randset4_one(netflag,meth,beta,path,ReM)
+                ReM <- randset4_one(netflag,meth,beta,path)
                 ReV <- colMeans(ReM)
                 
                 ## leave-one rank
@@ -265,21 +253,21 @@ batch_randset4_7_22 <- function(){
         }
     } 
     
-    save(PerM,file="PerM_8_13")
-
-    BestP <- matrix(0,8,3)
-    for(i in 1:8){
+    save(PerM,file="PerM_7_23")
+    
+    BestP <- matrix(0,5,3)
+    for(i in 1:5){
         BestP[i,1] <- netflags[i]
         tmp <- which(PerM[i,,]==max(PerM[i,,]),arr.ind=TRUE)
         BestP[i,2] <- tmp[1]
         BestP[i,3] <- betaV[tmp[2]]
     }
-    save(BestP,file="BestP_8_13")
-
+    save(BestP,file="BestP_7_23")
 }
 
-randset4_one <- function(netflag,meth,beta,path,ReM){
+randset4_one <- function(netflag,meth,beta,path){
     
+    ReM <- matrix(0,20,nodeN[netsub])
     for(i in 1:20){
         filename <- paste(path,"CRFresult_",beta,"part3_",i,"LBP_",netflag,".txt",sep="")
         ReM[i,] <- one_recurrent(filename,i)
@@ -334,20 +322,169 @@ best_performance_6_11 <- function(){
     options(stringsAsFactors=FALSE)
     TPcut=0.1
     options(stringsAsFactors=FALSE)
-    netstr <- c("STRING/","iRef/","coexp/","HPRD/","coexp1/")
-    netnum <- c(31,6,7,20,21)
+    netstr <- c("STRING/","iRef/","coexp/","Infer/","GNAT/")
+    netnum <- c(31,6,7,8,21)
     TADAFile <- "ASD/TADAresult/TADAdenovo_ASD4_16.csv"
     asdall <- read.csv(TADAFile)
     Tset <- asdall[asdall[,"qvalue.dn"]<=TPcut,1]
     
     ### leave one mutation ==========================================
-    ## see addresult leaveone_recurrent
+    
+    nLeo <- matrix(0,13,2)
+    
+    oneg <- c()
+    
+    ### TADA method
+    cfile <- "ASD/TADAresult/TADAdenovo_control.csv"
+    ctmp <- read.csv(cfile)
+    for(i in 1:length(Tset)){
+        filename <- paste("ASD/TADAresult/leaveone4/TADAdenovo_rand2_",i,".csv",sep="")
+        cutoff <- total_genes_cutoff(filename,Tset,muts="",alpha=0.5)
+        tmp <- read.csv(filename)
+        oner <- tmp[match(Tset[i],tmp[,1]),"qvalue.dn"]  <= 1-cutoff
+        nLeo[1,1] <- nLeo[1,1] + oner
+        if(oner & (ctmp[match(Tset[i],ctmp[,1]),2] <= 1-cutoff)) nLeo[1,2] <- nLeo[1,2] + 1
+    }
+    
+    ## DAWN method 
+    ### control data result  
+    cfile <- "result/control_6_12/DAWN/DAWNcontrol.csv"
+    ctmp <- read.csv(cfile)
+    ctmp[is.na(ctmp[,"Stage2_posterior"]),"Stage2_posterior"] <- 1
+    
+    for(i in 1:length(Tset)){
+        filename <- paste("result/leaveone4result/DAWN/DAWN_leaveone4_",i,".csv",sep="")
+        cutoff <- total_genes_cutoff(filename,Tset,muts="",alpha=0.5)
+        tmp <- read.csv(filename)
+        oner <- tmp[match(Tset[i],tmp[,1]),"Stage2_posterior"]  <= 1-cutoff
+        if(!is.na(oner)){
+            nLeo[2,1] <- nLeo[2,1] + oner
+            if(oner) oneg <- union(oneg,Tset[i])
+            if(oner & (Tset[i] %in% ctmp[,1])){
+                if(ctmp[match(Tset[i],ctmp[,1]),"Stage2_posterior"] <= 1-cutoff) nLeo[2,2] <- nLeo[2,2] + 1
+            }
+        }
+    }
+    
+    ###  MAGI method
+    cfile <- "result/control_6_12/MAGI/RandomGeneList.1"
+    ctmp <- read.table(cfile)
+    
+    for(i in 1:length(Tset)){
+        filename <- paste("result/leaveone4result/MAGI/RandomGeneList.",i,sep="")
+        cutoff <- total_genes_cutoff(filename,Tset,muts="",alpha=0.5)
+        tmp <- read.table(filename)
+        oner <- tmp[match(Tset[i],tmp[,1]),2]  >= cutoff
+        if(!is.na(oner)){
+            nLeo[3,1] <- nLeo[3,1] + oner
+            if(oner) oneg <- union(oneg,Tset[i])
+            if(oner & (ctmp[match(Tset[i],ctmp[,1]),2] >= cutoff)) nLeo[3,2] <- nLeo[3,2] + 1
+        }
+    }
+    
+    ### hotnet2 method 
+    for(j in 1:5){
+        cfile <- paste("result/control_6_12/hotnet/hotnetresult1control",netnum[j],".txt",sep="")
+        ctmp <- read.table(cfile)
+        
+        for(i in 1:length(Tset)){
+            filename <- paste("result/leaveone4result/",netstr[j],"hotnetresult1rand2_",i,netnum[j],".txt",sep="")
+            cutoff <- total_genes_cutoff(filename,Tset,muts="",alpha=0.5)
+            tmp <- read.table(filename)
+            oner <- tmp[match(Tset[i],tmp[,1]),2]  >= cutoff
+            if(!is.na(oner)){
+                if(oner) oneg <- union(oneg,Tset[i])
+                nLeo[j+3,1] <- nLeo[j+3,1] + oner
+                if(oner & (ctmp[match(Tset[i],ctmp[,1]),2] >= cutoff)) nLeo[j+3,2] <- nLeo[j+3,2] + 1
+            }
+        }       
+    }
+    
+    usoneg <- c()
+    ### our method
+    load("BestP_6_10")    
+    for(j in 1:5){
+        cfile <- paste("result/control_6_12/v",BestP[j,2],"/",netstr[j],"CRFresult_",BestP[j,3],"controlLBP_",netnum[j],".txt",sep="")
+        ctmp <- read.table(cfile)
+        for(i in 1:length(Tset)){
+            filename <- paste("result/leaveone4result_",BestP[j,2],"/",netstr[j],"CRFresult_2rand2_",i,"LBP_",netnum[j],".txt",sep="")
+            cutoff <- total_genes_cutoff(filename,Tset,muts="",alpha=0.5)
+            tmp <- read.table(filename)
+            oner <- tmp[match(Tset[i],tmp[,1]),2]  >= cutoff
+            if(!is.na(oner)){
+                if(oner) {oneg <- union(oneg,Tset[i]); usoneg <- union(usoneg,Tset[i]);}
+                nLeo[j+8,1] <- nLeo[j+8,1] + oner
+                if(oner & (ctmp[match(Tset[i],ctmp[,1]),2] >= cutoff)) nLeo[j+8,2] <- nLeo[j+8,2] + 1
+            }
+        }       
+    }
+    
+    length(oneg)
+    write.table(oneg,file="leaveone_genes_all.txt",quote=FALSE,col.names=FALSE,row.names=FALSE)
+    write.table(usoneg,file="leaveone_genes_us.txt",quote=FALSE,col.names=FALSE,row.names=FALSE)
+    ### genes in co-expression network degrees and betweenness 
+    source("Multi_net.R")
+    source("CRF_build.R")
+    netex <- build_net(7,fileexp="PCGCall.txt",net_e=FALSE)
+    deV <- colSums(netex$matrix)
+    beV <- read.table("data/Network_betweenness/Betweenness_node_coexp.txt")
+    
+    pdf(file="plot/MeaNet.pdf",width=10,height=7)
+    a1 <- max(deV[netex$node %in% Tset])
+    a2 <- max(beV[beV[,1] %in% Tset,2])
+    nulist <- list()
+    nulist[[1]] <- deV[netex$node %in% oneg]
+    nulist[[2]] <- deV[netex$node %in% setdiff(Tset,oneg)]
+    
+    nu1list <- list()
+    nu1list[[1]] <- log10(beV[beV[,1] %in% oneg,2])
+    nu1list[[2]] <- log10(beV[beV[,1] %in% setdiff(Tset,oneg),2])
+    
+    par(mfrow=c(1,2))
+    boxplot(nulist,names=c("CTP","NTP"),main = "Gene interactions", xlab = "", ylab = "Degree")
+    text(1.5,35,"t test pvalue: 0.0024")
+    boxplot(nu1list,names=c("CTP","NTP"),main= "Gene Betweenness", xlab="", ylab="Betweenness (log10)")
+    text(1.5,1,"t test pvalue: 0.00088")
+    dev.off()   
+    
+    ### recurrent in DDD 
+    metam1 <- read.csv("DDD_mutations/datasheet/mutation_4_15_table1.csv",skip=1)
+    metam1 <- metam1[,c(1,6,7,10,11)]
+    metam1[,2] <- metam1[,2] + metam1[,4]
+    metam1[,3] <- metam1[,3] + metam1[,5]
+    metam1 <- metam1[,1:3]
+    metam2 <- read.csv("DDD_mutations/datasheet/DDDmutation_4_15_table1.csv",skip=1)
+    genes <- intersect(metam2[,1],metam1[,1])
+    metam1[match(genes,metam1[,1]),2] <- metam1[match(genes,metam1[,1]),2] + metam2[match(genes,metam2[,1]),2]
+    metam1[match(genes,metam1[,1]),3] <- metam1[match(genes,metam1[,1]),3] + metam2[match(genes,metam2[,1]),3]
+    metam <- metam1
+    sum(rowSums(metam[metam[,1] %in% oneg,2:3])>0)
+    sum(rowSums(metam[metam[,1] %in% setdiff(Tset,oneg),2:3])>0)
+    sum(rowSums(metam[metam[,1] %in% Tset,2:3])>0)
+    a <- matrix(c(14,23,22,56),2,2)
+    fisher.test(t(a))
+    
+    
+    
+    
+    
+    ### plot figures
+    pdf(file="plot/FDRs6_12.pdf",width=10,height=10)
+    subs <- c(1,2,3,5,6,10,11)
+    par(mai=c(4,2,2,2))
+    legend=c("TADA","DAWN","MAGI","HotNet2-STRING","HotNet2-iRef","HotNet2-coexp","HotNet2-Infer","HotNet2-GNAT","MICRF-STRING","MICRF-iRef","MICRF-coexp","MICRF-Infer","MICRF-GNAT") 
+    #legend=c("TADA","DAWN","MAGI","RWR-STRING","RWR-iRef","RWR-coexp","RWR-Infer","RWR-GNAT","MICRF-STRING","MICRF-iRef","MICRF-coexp","MICRF-Infer","MICRF-GNAT")  
+    barplot(t(nLeo)[,subs], names.arg=legend[subs], beside=T, ylab="#gold risk genes", 
+            cex.names=1.5, las=2, ylim=c(0,max(nLeo)+3), col=c("red","darkblue"),cex.lab=1.5,cex.axis=1.25)
+    #box(bty="l")
+    legend("topleft",col=c("darkblue","red"),legend=c("ASD case","SSC control"),cex=1.3,fill=c("red","darkblue")) 
+    dev.off()    
     
 
     #######  independent samples  ===================================
     source("enrichana_6_12.R")
     ReM <- matrix(0,20,13)
-    load("BestP_7_24") 
+    load("BestP_6_10") 
     j=3
     for(i in 1:20){
         onefile <- paste("ASD/randset4/ASD2sub",j,"derest",i,".csv",sep="")
@@ -396,15 +533,35 @@ best_performance_6_11 <- function(){
             ReM[i,netk+8] <- length(intersect(tmpg,reTset))/length(reTset)##sum(rowSums(oneresult[match(tmpg,oneresult[,1]),c("dn.LoF","dn.mis3")])>0)/length(tmpg)
         }
     }
-
+    
+    
+    source("enrichana_6_12.R")
+    load("BestP_6_10") 
+    j=3
+    a <- rep(0,20)
+    for(i in 1:20){
+        onefile <- paste("ASD/randset4/ASD2sub",j,"derest",i,".csv",sep="")
+        oneresult <- read.csv(onefile)
+        TADAfile <- paste("ASD/TADAresult/randset4/TADAdenovo_ASD1sub",j,"depart",i,".csv",sep="")
+        subresult <- read.csv(TADAfile)
+        
+        subs <- rowSums(subresult[,c("dn.LoF","dn.mis3")])>0
+        genes <- subresult[subs,1]
+        
+        subs <- rowSums(oneresult[,c("dn.LoF","dn.mis3")])>0
+        genes1 <- oneresult[subs,1]
+        
+        a[i] <- length(intersect(genes1,genes))/length(genes)
+    }
+    
     
     ### plot figures ===================================
-    pdf(file="plot/recurr_7_23.pdf",width=10,height=7)
-    subs <- c(1,2,3,4,9,7,12,5,10,8,13,6,11)
-    par(mai=c(2.3,1,1,1))
-    cols <- c("red","green","dodgerblue","orange","orange","yellow","yellow","pink","pink","cyan","cyan","purple","purple")
-    legend=c("TADA","DAWN","MAGI","RWR-STRING","RWR-iRef","RWR-coexp","RWR-HPRD","RWR-corr","MICRF-STRING","MICRF-iRef","MICRF-coexp","MICRF-HPRD","MICRF-corr")
-    boxplot(ReM[,subs],col=cols,names=legend[subs],las=2,ylab="Fraction of recurrent genes",cex.axis=1.5,cex.lab=1.7,cex.names=2)
+    pdf(file="plot/sub6_12_f.pdf",width=10,height=7)
+    subs <- c(1,2,3,5,6,10,11)
+    par(mai=c(2,1,1,1))
+    legend=c("TADA","DAWN","MAGI","HotNet2-STRING","HotNet2-iRef","HotNet2-coexp","HotNet2-Infer","HotNet2-GNAT","MICRF-STRING","MICRF-iRef","MICRF-coexp","MICRF-Infer","MICRF-GNAT")
+    #legend=c("TADA","DAWN","MAGI","RWR-STRING","RWR-iRef","RWR-coexp","RWR-Infer","RWR-GNAT","MICRF-STRING","MICRF-iRef","MICRF-coexp","MICRF-Infer","MICRF-GNAT")
+    boxplot(ReM[,subs],col=2:(length(subs)+1),names=legend[subs],las=2,ylab="Fraction of recurrent genes",cex.axis=1.5,cex.lab=2,cex.names=2)
     dev.off()
     
 }
@@ -420,8 +577,8 @@ allPf <- function(TPcut,TADAFile="ASD/TADAresult/TADAdenovo_ASD4_16.csv"){
 
 filenamesf <- function(j,i,betaV,DAWNnames,Maginames){
     
-    netstr <- c("STRING/","iRef/","coexp/","HPRD/","coexp1/")
-    netnum <- c(31,6,7,20,21)
+    netstr <- c("STRING/","iRef/","coexp/","Infer/","GNAT/")
+    netnum <- c(31,6,7,8,21)
     
     tadastr <- "ASD/TADAresult/randset_1/TADAdenovo_ASD"
     DAWNstr <- "DAWN/DAWN_randset"
@@ -525,24 +682,25 @@ ROC_ex <- function(filenames,allP,genes,flag=2,xlim=c(0,1),ylim=c(0,1)){
     perf <- performance(pred, measure = "tpr", x.measure = "fpr") 
 
         cols <- c("Black","Blue","Cyan","Brown","Coral","DarkViolet","Green")
-        plot(x=c(0,1),y=c(0,1),col="black",lty=2,main="",xlab="False positive rate",ylab="True positive rate",cex.axis=2,cex.lab=2,cex.main=2,xlim=xlim,ylim=ylim,type="l")
+        plot(perf,main="",xlab="False positive rate",ylab="True positive rate",cex.lab=2,cex.main=2,xlim=xlim,ylim=ylim,xaxt="n",yaxt="n")
         for(i in 1:length(filenames)){
             if(i==1){
-                lines(perf@x.values[[i]], perf@y.values[[i]], col = cols[i],lwd=2,xaxt="n")
+                lines(perf@x.values[[i]], perf@y.values[[i]], col = cols[i],lwd=2)
             }else{
-                lines(perf@x.values[[i]], perf@y.values[[i]], col = cols[i],lwd=1,xaxt="n")
+                lines(perf@x.values[[i]], perf@y.values[[i]], col = cols[i],lwd=1)
             }
         }
-
-        legend=c("TADA","MICRF-STRING","MICRF-iRef","MICRF-coexp","MICRF-HPRD","MICRF-corr") ###
-        ords <- c(1,2,5,3,6,4)
+        lines(x=c(0,1),y=c(0,1),col=i+1,lty=2)
+        #axis(1,at=seq(0,1,0.1))
+        #axis(2,at=seq(0,1,0.1))
+        legend=c("TADA","MICRF-iRef","MICRF-coexp") ###
         legend <- paste(legend,format(auc,digits=3),sep="--AUC:")
     if(max(xlim)>=0.5){
-        legend("bottomright",col=cols[ords],legend=legend[ords],lty=rep(1,length(filenames)),lwd=rep(2,length(filenames)),cex=1.8,y.intersp=0.7) 
+        legend("bottomright",col=cols[1:length(filenames)],legend=legend,lty=rep(1,length(filenames)),lwd=rep(2,length(filenames)),cex=2,y.intersp=0.7) 
         a=0; b=0.1; c=0.3; d=0.6;
         red_box(a,b,c,d);
-        #a=0.05; b=0.3; c=0.8; d=1;
-        #red_box(a,b,c,d)
+        a=0.05; b=0.3; c=0.8; d=1;
+        red_box(a,b,c,d)
     }
         
 } 
@@ -659,51 +817,14 @@ new_auc <- function(filenames,allP,genes,flag=2,iplot=FALSE,DAWNflag=0){
     list(auc=auc,FPR=FPR,TPR=TPR)
 }
 
-new_auc_7_29 <- function(filenames,Tset){
-    
-    #  flag==1: only rank information is used
-    #  flag==2: FDR information is used
-    
-    library(ROCR)
-    library(pROC)
-    predictions <- list()
-    labels <- list()
-    
-    for(i in 1:length(filenames)){
-        filename <- filenames[i]
-        if(grepl(".csv",filename)){ result <- read.csv(filename); 
-        }else{result <- read.table(filename);}
-        
-        result <- result[!duplicated(result[,1]),]
-        
-        if(i==1){
-            predictions[[i]] <- 1 - result[,"qvalue.dn"]
-        }else if(i==2){
-            result[is.na(result[,"FDR"]),"FDR"] <- 1
-            result[is.na(result[,"Stage2_posterior"]),"Stage2_posterior"] <- 1
-            predictions[[i]] <- 1 - result[,"Stage2_posterior"]
-        }else{
-            predictions[[i]] <- result[,2]/max(result[,2])
-        }
-        
-        labels[[i]] <- rep(-1,length(predictions[[i]]))
-        labels[[i]][result[,1] %in% Tset] <- 1
-    }
-    
-    pred <- prediction(predictions, labels)
-    auc <- unlist(performance(pred, "auc")@y.values)
-
-    auc
-}
-
-plot_err <- function(x,y,sd,flag=1,main="ROC",xlab="Samples",ylab="AUC",xlim=c(0,1),ylim=c(0,1),cols){
-    
+plot_err <- function(x,y,sd,flag=1,main="ROC",xlab="Samples",ylab="AUC",xlim=c(0,1),ylim=c(0,1)){
+    cols <- c("Black","Blue","Cyan","Brown","Coral","DarkViolet","Green")
     if(flag==1){
         par(mar=c(6,6,3,2))
-        plot(x, y,xaxt="n", type="b",col=cols[flag], main=main, ylab=ylab,xlab=xlab,xlim=xlim,ylim=ylim,cex.lab=2,cex.main=2,lwd=2,cex.axis=1.8)
+        plot(x, y,xaxt="n", type="b",col=cols[flag], main=main, ylab=ylab,xlab=xlab,xlim=xlim,ylim=ylim,cex.lab=2,cex.main=2,lwd=3,cex.axis=1.8,pch=10)
         axis(1,at=seq(0.2,0.9,0.1)[1:length(x)],labels=floor(3953*seq(0.2,0.9,0.1))[1:length(x)],font=1,cex.axis=1.5)
     }else{
-        lines(x, y, type="b",col=cols[flag],xaxt="n",lwd=2)
+        lines(x, y, type="b",col=cols[flag],xaxt="n",lwd=3)
     }
     
     #axis(2,at=seq(ylim[1],ylim[2],0.1))
