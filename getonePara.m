@@ -1,9 +1,9 @@
 function wop=getonePara(onefile,dirstr)
 
-fM = -1 * ones(10,10);
-w1M = -1 * ones(10,10);
-w2M = -1 * ones(10,10);
-YM = -1 * ones(10,10);
+fM = 100000 * ones(10,10);
+w1M = 1000000 * ones(10,10);
+w2M = 1000000 * ones(10,10);
+YM = 1000000 * ones(10,10);
 
 for kk=1:100
 
@@ -12,6 +12,7 @@ for kk=1:100
     if(j==0) j = 10; end
     
     filename= [dirstr int2str(kk) '.mat'];
+    if exist(filename,'file') == 2
     load(filename)
         
     fM(i,j)=f;
@@ -20,6 +21,7 @@ for kk=1:100
     YM(i,j)=sum(Y==1);
     
     clearvars -except fM w1M w2M YM kk dirstr onefile
+    end
     kk
 end
 
@@ -58,7 +60,7 @@ nParams = max([nodeMap(:);edgeMap(:)]);
 
 wop=zeros(nParams,1);
 lx=find(fM==min(fM(:)));
-[rx,cx]=ind2sub(size(fM),lx);
+[rx,cx]=ind2sub(size(fM),lx); % only one unique minimum value
 wop(1) = w1M(rx,cx);
 wop(2) = w2M(rx,cx);
 
