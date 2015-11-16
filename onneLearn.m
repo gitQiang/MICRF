@@ -67,7 +67,7 @@ for e = 1:nEdges
     edgePot(1,1,e) =   max(1,log2(x11/(1-x11)+1))*F(sube);
     edgePot(1,2,e) =   F(sube);
     edgePot(2,1,e) =   F(sube);
-    edgePot(2,2,e) =   max(1,log2(x22/(1-x22)+1))*F(sube);
+    edgePot(2,2,e) =   max(1,2*x22)*F(sube);
 end
 
 clear adj
