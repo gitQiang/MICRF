@@ -67,11 +67,11 @@ for e = 1:nEdges
     x11 = 0.5 * (nodePot(n1,1) + nodePot(n2,1));
     x22 = 0.5 * (nodePot(n1,2) + nodePot(n2,2));
     
-    edgePot(1,1,e) =   x11*F(sube);
-    edgePot(1,2,e) =   0;
-    edgePot(2,1,e) =   0;
-    edgePot(2,2,e) =   x22*F(sube);
+    edgePot(1,1,e) =   (1+sqrt(nodePot(n1,1) * nodePot(n2,1)))*F(sube);
+    edgePot(1,2,e) =   F(sube);
+    edgePot(2,1,e) =   F(sube);
+    edgePot(2,2,e) =   (1+sqrt(nodePot(n1,2) * nodePot(n2,2)))*F(sube);
 end
 
 clear adj
-save iRef_sim_3.mat 
+save iRef_sim_4.mat 
