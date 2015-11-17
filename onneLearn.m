@@ -28,17 +28,20 @@ end
 %% make pseudo potential functions
 % 1 risk state, 2 non-risk state
 
+Pri=zeros(2,1);
+Pri(1)=0.06;
+Pri(2)=0.94;
 % Make (non-negative) potential of each node taking each state
 nodePot = ones(nNodes,maxState); %!!!!!!!!! zeros and ones for node information
-nodePot(:,1) = 0.06;
-nodePot(:,2) = 0.94;
+nodePot(:,1) = Pri(1)*Pri(2);
+nodePot(:,2) = Pri(2)*Pri(1);
 
 for n = 1:length(node_s)
      [~,j] = ismember(node_s(n),genes);
      [~,i] = ismember(node_s(n),nodes);
         
-     nodePot(j,1) = score1(i);
-     nodePot(j,2) = 1 - score1(i);
+     nodePot(j,1) = score1(i)*Pri(2);
+     nodePot(j,2) = (1 - score1(i))*Pri(1);
 end
 
 
@@ -64,10 +67,10 @@ for e = 1:nEdges
     x11 = min(0.5 * (nodePot(n1,1) + nodePot(n2,1)),0.9999999);
     x22 = min(0.5 * (nodePot(n1,2) + nodePot(n2,2)),0.9999999);
     
-    edgePot(1,1,e) =   max(1, 10/(1+exp(-(0.94/0.06)*(x11-0.5)))-4)*F(sube);
+    edgePot(1,1,e) =   (1+x11)*F(sube);
     edgePot(1,2,e) =   F(sube);
     edgePot(2,1,e) =   F(sube);
-    edgePot(2,2,e) =   max(1,2*x22)*F(sube);
+    edgePot(2,2,e) =   (1+x22)*F(sube);
 end
 
 clear adj
