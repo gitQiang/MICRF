@@ -18,5 +18,4 @@ for i = 1:length(genes)
 fprintf(fileID,'%s\t%f\t%d\n',genes{Ind(i)},nps(Ind(i)),Y(Ind(i)));
 end
 fclose(fileID);
-
 end

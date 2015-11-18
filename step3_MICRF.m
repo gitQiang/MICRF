@@ -10,7 +10,6 @@ nStates = ones(1,nNodes) * 2;
 
 % Make structure that tracks edge information
 edgeStruct = UGM_makeEdgeStruct(adj,nStates); 
-nEdges = edgeStruct.nEdges;
 
 % read TADA score
 fcon =  fopen(nodef,'r');
@@ -59,10 +58,10 @@ edges = strcat(cellstr(genes(n1)),'_',cellstr(genes(n2)));
 sube = ind1 + ind2;
 % Compute Edge Features (use node features from both nodes)
 Xedge = zeros(nInstance,nEdgeFeatures,nEdges);
-Xedge(i,1,:) = (1+sqrt(Xnode(1,1,n1) .* Xnode(1,1,n2))).*F(sube);
-Xedge(i,2,:) = F(sube);
-Xedge(i,3,:) = F(sube);
-Xedge(i,4,:) = (1+sqrt(Xnode(1,2,n1) .* Xnode(1,2,n2))).*F(sube);
+Xedge(1,1,:) = reshape(1+sqrt(Xnode(1,1,n1) .* Xnode(1,1,n2)),[],1).*F(sube);
+Xedge(1,2,:) = F(sube);
+Xedge(1,3,:) = F(sube);
+Xedge(1,4,:) = reshape(1+sqrt(Xnode(1,2,n1) .* Xnode(1,2,n2)),[],1).*F(sube);
 [nodeMap,edgeMap] = UGM_makeCRFmaps_ehq(Xnode,Xedge,edgeStruct);
 
 %% training 
