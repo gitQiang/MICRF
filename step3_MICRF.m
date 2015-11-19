@@ -1,6 +1,5 @@
-function [genes,Y,nps,eps,logZ]=step3_MICRF(netfile,beness,nodef,adjf,w0)
+function [genes,Y,nps,eps,logZ]=step3_MICRF(netfile,beness,nodef,adj,w0)
 
-load(adjf);
 
 % read the network edges and node
 [node1,node2,weights] = textread(netfile,'%s%s%f','delimiter','\t');
