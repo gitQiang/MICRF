@@ -13,10 +13,16 @@ edgeStruct = UGM_makeEdgeStruct(adj,nStates);
 
 % read TADA score
 fcon =  fopen(nodef,'r');
-C = textscan(fcon,'%s%f','delimiter','\t');
-nodes= C{1};
+C = textscan(fcon,'%s%s','delimiter','\t');
+nodes =C{1};
 score1=C{2};
 fclose(fcon);
+% delete NA value in score1
+subs=find(~strcmp(score1,'NA'));
+nodes=nodes(subs);
+score1=score1(subs);
+score1=str2double(score1);
+
 node_s = intersect(nodes,genes);
 % read edge betweenness
 [enode1,enode2,be] = textread(beness,'%s -- %s\t%f');
