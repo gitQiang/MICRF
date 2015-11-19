@@ -20,11 +20,7 @@ fclose(fcon);
 node_s = intersect(nodes,genes);
 % read edge betweenness
 [enode1,enode2,be] = textread(beness,'%s -- %s\t%f');
-n_e = length(be);
-F = zeros(n_e,1);
-for i=1:n_e
-    F(i) = sum(be <= be(i))/n_e;
-end
+F=tiedrank(be)/length(be);
 edgesb1 = strcat(enode1,'_',enode2);
 edgesb2 = strcat(enode2,'_',enode1);
 
