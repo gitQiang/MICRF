@@ -61,8 +61,8 @@ nParams = max([nodeMap(:);edgeMap(:)]);
 wop=zeros(nParams,1);
 lx=find(fM==min(fM(:)));
 [rx,cx]=ind2sub(size(fM),lx); % only one unique minimum value
-wop(1) = w1M(rx,cx);
-wop(2) = w2M(rx,cx);
+wop(1) = w1M(rx(1),cx(1));
+wop(2) = w2M(rx(1),cx(1));
 
 % update potentials
 [nodePot,edgePot] = UGM_CRF_makePotentials(wop,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,1);

@@ -1,5 +1,9 @@
 function w = qsub(kk,onefile,dir)
 
+fprintf('%d\n',kk);
+fprintf('%s\n',onefile);
+fprintf('%s\n',dir);
+
 addpath(genpath(pwd))
 load(onefile)
 
