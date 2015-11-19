@@ -1,4 +1,4 @@
-function MICRF_randset4(kk)
+function MICRF_leaveone4(kk)
 addpath(genpath(pwd))
 
 netfiles=cell(6,1);
@@ -33,11 +33,17 @@ adjfiles{4}='adj_braincor.mat';
 adjfiles{5}='adj.mat'; 
 adjfiles{6}='adj_Co_PrePPI.mat';  
 
-netj=mod(kk,20);
+%% different for simulation sets
+nSim=121;
+inputpath='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/leaveone4/';
+inputstr='rand2_';
+outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/leaveone4result_5/MICRFresult_';
+
+netj=mod(kk,nSim);
 if netj == 0 
-	netj=20;
+	netj=nSim;
 end
-netflag=floor((kk-1)/20)+1;
+netflag=floor((kk-1)/nSim)+1;
 if netflag == 1
 instr = 'CRF_input';
 idm=1;
@@ -45,11 +51,9 @@ else
 instr = 'hotnet_input'; 
 idm=0;
 end
-
 w0=wop0(:,netflag);
-nodef=['/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randset4/' instr 'part3_' int2str(netj) '.txt'];
-%onefile=['/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randset4/' instr 'part3_' int2str(netj) '.mat'];
-outputfile=['/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randresult4_5/MICRFresult_' int2str(netflag) '_' int2str(netj) '.txt'];
+nodef=[inputpath,instr,inputstr,int2str(netj),'.txt'];
+outputfile=[outputstr,int2str(netflag),'_',int2str(netj),'.txt'];
 netfile=netfiles{netflag};
 beness=benesss{netflag};
 adjf=adjfiles{netflag};
