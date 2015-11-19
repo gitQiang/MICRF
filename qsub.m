@@ -65,15 +65,15 @@ while flag==0
 
     % training a CRF model
     lambda = ones(size(w)); %lambda(2) = 10;
-    regFunObj = @(w)penalizedL2(w,@UGM_CRF_NLL,lambda,Xnode,Xedge,Y,nodeMap,edgeMap,edgeStruct,inferFunc);
+    regFunObj = @(w)penalizedL2(w,@UGM_CRF_NLL_hq,lambda,Xnode,Xedge,Y,nodeMap,edgeMap,edgeStruct,inferFunc);
     [w,f]= minFunc(regFunObj,w);
     %options = struct('Display','iter','MaxIter',100,'TolX',1e-5);
     %[w,f] = minFunc(@UGM_CRF_NLL,w,options,Xnode,Xedge,Y,nodeMap,edgeMap,edgeStruct,inferFunc);
     
     % fix bugs for illegal direction
     if isnan(f)==1 
-        w(1)=w(1)+7;
-        w(2)=w(2)+6;
+        w(1)=w(1)+6;
+        w(2)=w(2)+26;
         [nodePot,edgePot] = UGM_CRF_makePotentials(w,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,1);
         Y = UGM_Decode_LBP(nodePot,edgePot,edgeStruct);
         Y = int32(Y');
