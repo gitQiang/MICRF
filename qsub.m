@@ -82,8 +82,7 @@ while flag==0
         [w,f]= minFunc(regFunObj,w);
     end
     
-    if norm(w-w0,1) <= 1e-5
-    %if abs(f-f0) <= 1e-5 
+    if norm(w-w0,1) <= 1e-5 && abs(f-f0) <= 1e-5 
         flag = 1;
     else
         f0 = f;
