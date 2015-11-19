@@ -6,12 +6,12 @@ genes = union(node1,node2);
 nNodes = length(genes);
 % Make Adjacency Matrix 
 adj = zeros(nNodes); % Symmetric {0,1} matrix containing edges
-for r = 1:length(node1)
-    [~,i] = ismember(node1(r),genes);
-    [~,j] = ismember(node2(r),genes);
-    adj(i,j)=1;
-    adj(j,i)=1;
-    adj(i,i)=0;
-end
-
+[~,i] = ismember(node1,genes);
+[~,j] = ismember(node2,genes);
+sub1 = nNodes*(j-1) + i;
+sub2 = nNodes*(i-1) + j; 
+adj(sub1)=1;
+adj(sub2)=1;  
+adj(1:(nNodes+1):end)=0;
+    
 end
