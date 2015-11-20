@@ -1,4 +1,4 @@
-function MICRF_randset4(kk)
+function MICRF_randset1(kk)
 addpath(genpath(pwd))
 
 netfiles=cell(6,1);
@@ -18,12 +18,12 @@ benesss{5}='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/data/Network_betwe
 benesss{6}='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/data/Network_betweenness/Betweenness_edge_Co_PrePPI.txt';
 
 wop0= zeros(2,6);
-wop0(:,1) =[6;26];
+wop0(:,1) =[];
 wop0(:,2) =[6.9419;24.7418];
 wop0(:,3) =[7.6585;25.9918];
 wop0(:,4) =[5.4660;16.1872];
 wop0(:,5) =[3.5793;27.2895];
-wop0(:,6) =[6;26];
+wop0(:,6) =[1;1];
 
 adjfiles=cell(6,1);
 adjfiles{1}='adj_STRING.mat'; 
@@ -33,11 +33,24 @@ adjfiles{4}='adj_braincor.mat';
 adjfiles{5}='adj.mat'; 
 adjfiles{6}='adj_Co_PrePPI.mat';  
 
-netj=mod(kk,20);
+%% different for simulation sets
+nSim=160;
+inputpath='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randset_1/';
+inputstr='rand1';
+outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randresult_5/MICRFresult_';
+
+netj=mod(kk,nSim);
 if netj == 0 
-	netj=20;
+	netj=nSim;
 end
-netflag=floor((kk-1)/20)+1;
+% different simulated sets
+netj_i = floor((netj-1)/20)+2;
+netj_j = mod(netj,20);
+if netj_j == 0 
+	netj_j=20;
+end
+
+netflag=floor((kk-1)/nSim)+1;
 if netflag == 1
 instr = 'CRF_input';
 idm=1;
@@ -45,11 +58,11 @@ else
 instr = 'hotnet_input'; 
 idm=0;
 end
-
 w0=wop0(:,netflag);
-nodef=['/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randset4/' instr 'part3_' int2str(netj) '.txt'];
-%onefile=['/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randset4/' instr 'part3_' int2str(netj) '.mat'];
-outputfile=['/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randresult4_5/MICRFresult_' int2str(netflag) '_' int2str(netj) '.txt'];
+
+nodef=[inputpath,instr,inputstr,int2str(netj_i),'_',int2str(netj_j),'.txt'];
+outputfile=[outputstr,int2str(netflag),'_',int2str(netj_i),'_',int2str(netj_j),'.txt'];
+
 netfile=netfiles{netflag};
 beness=benesss{netflag};
 adjf=adjfiles{netflag};
