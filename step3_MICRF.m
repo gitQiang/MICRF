@@ -72,8 +72,9 @@ f0 = f;
 w=w0;
 flag = 0;
 iter = 0;
+maxiter=100;
 inferFunc = @UGM_Infer_LBP; 
-while flag==0
+while (flag==0 && iter <= maxiter)
     % update potentials
     [nodePot,edgePot] = UGM_CRF_makePotentials(w,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,1);
     % decoding a CRF model
