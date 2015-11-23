@@ -74,6 +74,13 @@ flag = 0;
 iter = 0;
 maxiter=100;
 inferFunc = @UGM_Infer_LBP; 
+
+maxFunEvals = 20;
+options = [];
+options.maxFunEvals = maxFunEvals;
+options.progTol = 1e-2;
+options.optTol = 1e-2;
+        
 while (flag==0 && iter <= maxiter)
     % update potentials
     [nodePot,edgePot] = UGM_CRF_makePotentials(w,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,1);
@@ -84,8 +91,12 @@ while (flag==0 && iter <= maxiter)
     % training a CRF model
     lambda = ones(size(w)); 
     regFunObj = @(w)penalizedL2(w,@UGM_CRF_NLL,lambda,Xnode,Xedge,Y,nodeMap,edgeMap,edgeStruct,inferFunc);
-    [w,f]= minFunc(regFunObj,w);
+    [w,f]= minFunc(regFunObj,w,options);
    
+    if isnan(f)
+        w = w0;
+        break;
+    end
     if norm(w-w0,1) <= 1e-5 && norm(f-f0,1) <= 1e-5
         flag = 1;
     else
