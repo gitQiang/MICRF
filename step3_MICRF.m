@@ -1,4 +1,4 @@
-function [genes,Y,nps,eps,logZ]=step3_MICRF(netfile,beness,nodef,adj,w0)
+function [genes,Y,nps]=step3_MICRF(netfile,beness,nodef,adj,w0)
 
 
 % read the network edges and node
@@ -113,6 +113,10 @@ end
 [nodePot,edgePot] = UGM_CRF_makePotentials(w,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,1);
 Y = UGM_Decode_LBP(nodePot,edgePot,edgeStruct); % decoding a CRF model
 Y = int32(Y');
-[nps,eps,logZ] = UGM_Infer_LBP(nodePot,edgePot,edgeStruct); % infer conditional probability
+nps = UGM_Infer_LBP(nodePot,edgePot,edgeStruct); % infer conditional probability
+if any(isnan(nps))
+    nps = UGM_Infer_TRBP(nodePot,edgePot,edgeStruct); % trying TRBP
+    nps(isnan(nps)) = Xnode(isnan(nps)); 
+end
 
 end

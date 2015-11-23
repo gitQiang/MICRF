@@ -12,10 +12,11 @@ if idm == 1
     genes(subs(sub2))=id2(j(subs(sub2)));
 end
 
-[~,Ind]=sort(nps,'descend');
+% nps with size nNodes * nstate
+[~,Ind]=sort(nps(:,1),'descend'); % 1 as risk, 2 as non-risk
 fileID = fopen(outputfile,'w');
 for i = 1:length(genes)
-fprintf(fileID,'%s\t%f\t%d\n',genes{Ind(i)},nps(Ind(i)),Y(Ind(i)));
+fprintf(fileID,'%s\t%f\t%d\n',genes{Ind(i)},nps(Ind(i),1),Y(Ind(i)));
 end
 fclose(fileID);
 end
