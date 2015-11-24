@@ -1,83 +1,11 @@
-function oneLearn(netfile,beness,nodef,adj,kk,outputfile)
+function oneLearn(kk,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,outputfile)
 
 fprintf('%d\n',kk);
 
-% read the network edges and node
-[node1,node2,weights] = textread(netfile,'%s%s%f','delimiter','\t');
-genes = union(node1,node2);
-nNodes = length(genes);
-nStates = ones(1,nNodes) * 2;
-
-% Make structure that tracks edge information
-edgeStruct = UGM_makeEdgeStruct(adj,nStates); 
-
-% read TADA score
-fcon =  fopen(nodef,'r');
-C = textscan(fcon,'%s%s','delimiter','\t');
-nodes =C{1};
-score1=C{2};
-fclose(fcon);
-% delete NA value in score1
-subs=find(~strcmp(score1,'NA'));
-nodes=nodes(subs);
-score1=score1(subs);
-score1=str2double(score1);
-
-node_s = intersect(nodes,genes);
-% read edge betweenness
-[enode1,enode2,be] = textread(beness,'%s -- %s\t%f');
-%F=tiedrank(be)/length(be);
-n_e = length(be);
-F = zeros(n_e,1);
-for i=1:n_e
-    F(i) = sum(be <= be(i))/n_e;
-end
-
-edgesb1 = strcat(enode1,'_',enode2);
-edgesb2 = strcat(enode2,'_',enode1);
-
-% risk genes prior information
-Pri=zeros(2,1); 
-Pri(1)=0.06;
-Pri(2)=0.94;
-
-%% initial node and edge features: % 1 risk state, 2 non-risk state
-nInstance = 1;
-nNodes = length(genes);
-nEdges = size(edgeStruct.edgeEnds,1);
-nEdgeFeatures=4;
-
-% Make node features
-nNodeFeatures = 2;
-Xnode = zeros(nInstance, nNodeFeatures, nNodes);
-Xnode(1,1,:) = Pri(1)*Pri(2);
-Xnode(1,2,:) = Pri(2)*Pri(1);
-[~,j] = ismember(node_s,genes);
-[~,i] = ismember(node_s,nodes);        
-Xnode(1,1,j) = score1(i)*Pri(2);
-Xnode(1,2,j) = (1 - score1(i))*Pri(1);
-
-% Make edge features
-n1 = edgeStruct.edgeEnds(:,1);
-n2 = edgeStruct.edgeEnds(:,2);
-edges = strcat(cellstr(genes(n1)),'_',cellstr(genes(n2)));
-[~,ind1] = ismember(edges,edgesb1);
-[~,ind2] = ismember(edges,edgesb2);
-sube = ind1 + ind2;
-% Compute Edge Features (use node features from both nodes)
-Xedge = zeros(nInstance,nEdgeFeatures,nEdges);
-Xedge(1,1,:) = reshape(1+sqrt(Xnode(1,1,n1) .* Xnode(1,1,n2)),[],1).*F(sube);
-Xedge(1,2,:) = F(sube);
-Xedge(1,3,:) = F(sube);
-Xedge(1,4,:) = reshape(1+sqrt(Xnode(1,2,n1) .* Xnode(1,2,n2)),[],1).*F(sube);
-[nodeMap,edgeMap] = UGM_makeCRFmaps_ehq(Xnode,Xedge,edgeStruct);
-nParams = max([nodeMap(:);edgeMap(:)]);
-
 %% training 
-% run with different initial w values
+nParams = max([nodeMap(:);edgeMap(:)]);
 w = ones(nParams,1);
 f = 100000;
-
 i = floor((kk-1)/10) + 1;
 j = mod(kk,10);
 if j==0 
@@ -100,7 +28,7 @@ options.maxFunEvals = maxFunEvals;
 options.progTol = 1e-3;
 options.optTol = 1e-3;
 
-while flag==0
+while (flag==0 && iter <= maxiter)
     % update potentials
     [nodePot,edgePot] = UGM_CRF_makePotentials(w,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,1);
     % decoding a CRF model
