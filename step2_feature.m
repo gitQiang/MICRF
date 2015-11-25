@@ -31,8 +31,8 @@ edgesb2 = strcat(enode2,'_',enode1);
 %% initial node and edge features: % 1 risk state, 2 non-risk state
 % risk genes prior information
 Pri=zeros(2,1); 
-Pri(1)=1;
-Pri(2)=1;
+Pri(1)=0.06;
+Pri(2)=0.94;
 
 nInstance = 1;
 nNodes = length(genes);
@@ -58,10 +58,10 @@ edges = strcat(cellstr(genes(n1)),'_',cellstr(genes(n2)));
 sube = ind1 + ind2;
 % Compute Edge Features (use node features from both nodes)
 Xedge = zeros(nInstance,nEdgeFeatures,nEdges);
-Xedge(1,1,:) = reshape(1+sqrt(Xnode(1,1,n1) .* Xnode(1,1,n2)),[],1).*F(sube);
+Xedge(1,1,:) = reshape(1+min(Xnode(1,1,n1), Xnode(1,1,n2)),[],1).*F(sube);
 Xedge(1,2,:) = F(sube);
 Xedge(1,3,:) = F(sube);
-Xedge(1,4,:) = reshape(1+sqrt(Xnode(1,2,n1) .* Xnode(1,2,n2)),[],1).*F(sube);
+Xedge(1,4,:) = reshape(1+min(Xnode(1,2,n1), Xnode(1,2,n2)),[],1).*F(sube);
 [nodeMap,edgeMap] = UGM_makeCRFmaps_ehq(Xnode,Xedge,edgeStruct);
 
 end

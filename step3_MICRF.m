@@ -1,4 +1,4 @@
-function [Y,nps]=step3_MICRF(Xnode,Xedge,nodeMap,edgeMap,edgeStruct,w0)
+function [Y,nps,w]=step3_MICRF(Xnode,Xedge,nodeMap,edgeMap,edgeStruct,w0)
 
 %% training 
 % initial parameters

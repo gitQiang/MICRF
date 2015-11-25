@@ -6,12 +6,12 @@ addpath(genpath(pwd))
 [netfiles,benesss,adjfiles]=getFiles();
 
 wop0= zeros(2,6);
-wop0(:,1) =[1;1];
-wop0(:,2) =[6.9419;24.7418];
-wop0(:,3) =[4.2161,4.0729]; %[7.6585;25.9918];
-wop0(:,4) =[5.4660;16.1872];
-wop0(:,5) =[3.5793;27.2895];
-wop0(:,6) =[1;1];
+wop0(:,1) =[5.8048;22.8483];%[1;1];
+wop0(:,2) =[8.0008;24.3965];%[6.9419;24.7418];
+wop0(:,3) =[9.2782;25.2912]; %[4.2034;4.2621];%[4.2161;4.0729]; %[7.6585;25.9918];
+wop0(:,4) =[6.5186;15.8487];%[5.4660;16.1872];
+wop0(:,5) =[10.0782;25.5586];%[3.5793;27.2895];
+wop0(:,6) =[7;23];
 
 %% different for simulation sets
 if nrand == 1    
@@ -34,7 +34,8 @@ if nrand == 3
     % rand set 3: recurrent mutation, 20 simulations for each net
     nSim=20;
     inputpath='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randset4/';
-    inputstr='part3_';
+    %inputstr='part3_';
+    inputstr='rest3_';
     outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randresult4_5/MICRFresult_';
 end
 
@@ -86,8 +87,8 @@ load(adjf);
 
 %% step 2 and 3: compute initial edge and node features; MICRF training, decoding and inferring
 [genes,Xnode,Xedge,nodeMap,edgeMap,edgeStruct]=step2_feature(netfile,beness,nodef,adj);
-[Y,nps]=step3_MICRF(Xnode,Xedge,nodeMap,edgeMap,edgeStruct,w0);
-
+[Y,nps,w]=step3_MICRF(Xnode,Xedge,nodeMap,edgeMap,edgeStruct,w0);
+fprintf('%f\t%f\n',w(1),w(2));
 %% step 4: output files
 step4_output(genes,Y,nps,outputfile,idm);
 
