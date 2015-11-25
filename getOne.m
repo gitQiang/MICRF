@@ -15,15 +15,17 @@ for kk = 1:600
         netj=nSim;
     end
     netflag=floor((kk-1)/nSim)+1;
-    outputfile=[outputstr,netflag,'_',netj,'.txt'];
-
-    fcon =  fopen(outputfile,'r');
-    C = textscan(fcon,'%d\t%d\t%d\t%f\t%f\t%f\t%d\n','delimiter','\t');
-    fclose(fcon);
-
-    w1V(kk) = C{4};
-    w2V(kk) = C{5};
-    fV(kk)= C(6);
+    outputfile=[outputstr,int2str(netflag),'_',int2str(netj),'.txt'];
+    
+    if exist(outputfile,'file') ==2
+        fcon =  fopen(outputfile,'r');
+        C = textscan(fcon,'%d\t%d\t%d\t%f\t%f\t%f\t%d\n','delimiter','\t');
+        fclose(fcon);
+    
+        w1V(kk) = C{4}(1);
+        w2V(kk) = C{5}(1);
+        fV(kk)= C{6}(1);
+    end
 end
 
 for i = 1:6

@@ -56,7 +56,7 @@ while (flag==0 && iter <= maxiter)
     fprintf('%d\n',iter);
 end
 
-
+fprintf('%f\t%f\t%f\n',w(1),w(2),f);
 %% decoding and inferring    
 [nodePot,edgePot] = UGM_CRF_makePotentials(w,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,1);
 Y = UGM_Decode_LBP(nodePot,edgePot,edgeStruct); % decoding a CRF model

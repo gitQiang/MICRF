@@ -1,11 +1,14 @@
 function MICRF_randsets(kk,nrand)
+fprintf('%d\n',kk);
+fprintf('%d\n',nrand);
+
 addpath(genpath(pwd))
 [netfiles,benesss,adjfiles]=getFiles();
 
 wop0= zeros(2,6);
 wop0(:,1) =[1;1];
 wop0(:,2) =[6.9419;24.7418];
-wop0(:,3) =[7.6585;25.9918];
+wop0(:,3) =[4.2161,4.0729]; %[7.6585;25.9918];
 wop0(:,4) =[5.4660;16.1872];
 wop0(:,5) =[3.5793;27.2895];
 wop0(:,6) =[1;1];

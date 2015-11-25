@@ -31,8 +31,8 @@ edgesb2 = strcat(enode2,'_',enode1);
 %% initial node and edge features: % 1 risk state, 2 non-risk state
 % risk genes prior information
 Pri=zeros(2,1); 
-Pri(1)=0.06;
-Pri(2)=0.94;
+Pri(1)=1;
+Pri(2)=1;
 
 nInstance = 1;
 nNodes = length(genes);
