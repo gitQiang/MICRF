@@ -5,13 +5,20 @@ fprintf('%d\n',nrand);
 addpath(genpath(pwd))
 [netfiles,benesss,adjfiles]=getFiles();
 
+fcon =  fopen('wop_6.txt','r');
+C = textscan(fcon,'%f%f%f%f%f%f','delimiter',',');
+fclose(fcon);
+
 wop0= zeros(2,6);
+for i=1:6
+wop0(:,i) =[C{i}(1);C{i}(2)];
+end
 wop0(:,1) =[5.8048;22.8483];%[1;1];
-wop0(:,2) =[8.0008;24.3965];%[6.9419;24.7418];
-wop0(:,3) =[9.2782;25.2912]; %[4.2034;4.2621];%[4.2161;4.0729]; %[7.6585;25.9918];
-wop0(:,4) =[6.5186;15.8487];%[5.4660;16.1872];
-wop0(:,5) =[10.0782;25.5586];%[3.5793;27.2895];
-wop0(:,6) =[7;23];
+%wop0(:,2) =[8.0008;24.3965];%[6.9419;24.7418];
+%wop0(:,3) =[30.5311;8.3772];%[21.8551;20.4921];%[9.3668;3.5076];%[9.2782;25.2912]; %[4.2034;4.2621];%[4.2161;4.0729]; %[7.6585;25.9918];
+%wop0(:,4) =[6.5186;15.8487];%[5.4660;16.1872];
+%wop0(:,5) =[10.0782;25.5586];%[3.5793;27.2895];
+%wop0(:,6) =[7;23];
 
 %% different for simulation sets
 if nrand == 1    
@@ -71,6 +78,9 @@ if nrand == 1
     end
     nodef=[inputpath,instr,inputstr,int2str(netj_i),'_',int2str(netj_j),'.txt'];
     outputfile=[outputstr,int2str(netflag),'_',int2str(netj_i),'_',int2str(netj_j),'.txt'];
+elseif nrand == 4
+    nodef=[inputpath instr inputstr '.txt'];
+    outputfile=[outputstr int2str(netflag) '.txt'];
 else
     nodef=[inputpath,instr,inputstr,int2str(netj),'.txt'];
     outputfile=[outputstr,int2str(netflag),'_',int2str(netj),'.txt'];
@@ -90,6 +100,6 @@ load(adjf);
 [Y,nps,w]=step3_MICRF(Xnode,Xedge,nodeMap,edgeMap,edgeStruct,w0);
 fprintf('%f\t%f\n',w(1),w(2));
 %% step 4: output files
-step4_output(genes,Y,nps,outputfile,idm);
+step4_output(genes,Y,nps,Xnode,outputfile,idm);
 
 end

@@ -58,10 +58,10 @@ edges = strcat(cellstr(genes(n1)),'_',cellstr(genes(n2)));
 sube = ind1 + ind2;
 % Compute Edge Features (use node features from both nodes)
 Xedge = zeros(nInstance,nEdgeFeatures,nEdges);
-Xedge(1,1,:) = reshape(1+min(Xnode(1,1,n1), Xnode(1,1,n2)),[],1).*F(sube);
-Xedge(1,2,:) = reshape(1+min(Xnode(1,1,n1), Xnode(1,2,n2)),[],1).*F(sube);
-Xedge(1,3,:) = reshape(1+min(Xnode(1,2,n1), Xnode(1,1,n2)),[],1).*F(sube);
-Xedge(1,4,:) = reshape(1+min(Xnode(1,2,n1), Xnode(1,2,n2)),[],1).*F(sube);
+Xedge(1,1,:) = reshape(min(Xnode(1,1,n1), Xnode(1,1,n2)),[],1).*F(sube);
+Xedge(1,2,:) = reshape(min(Xnode(1,1,n1), Xnode(1,2,n2)),[],1).*F(sube);
+Xedge(1,3,:) = reshape(min(Xnode(1,2,n1), Xnode(1,1,n2)),[],1).*F(sube);
+Xedge(1,4,:) = reshape(min(Xnode(1,2,n1), Xnode(1,2,n2)),[],1).*F(sube);
 [nodeMap,edgeMap] = UGM_makeCRFmaps_ehq(Xnode,Xedge,edgeStruct);
 
 end

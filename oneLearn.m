@@ -72,7 +72,7 @@ while (flag==0 && iter <= maxiter)
 end
 
 fileID = fopen(outputfile,'w');
-fprintf(fileID,'%d\t%d\t%d\t%f\t%f\t%f\t%d\n',kk,i,j,w(1),w(2),f,flag);
+fprintf(fileID,'%d\t%d\t%d\t%f\t%f\t%12.8f\t%d\n',kk,i,j,w(1),w(2),f,flag);
 fclose(fileID);
 
 end

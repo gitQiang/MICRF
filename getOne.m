@@ -9,7 +9,7 @@ w1V=zeros(600,1);
 w2V=zeros(600,1);
 fV =zeros(600,1);
 
-for kk = 201:300
+for kk = 1:600
     netj=mod(kk,nSim);
     if netj == 0 
         netj=nSim;
@@ -19,7 +19,7 @@ for kk = 201:300
     
     if exist(outputfile,'file') ==2
         fcon =  fopen(outputfile,'r');
-        C = textscan(fcon,'%d\t%d\t%d\t%f\t%f\t%f\t%d\n','delimiter','\t');
+        C = textscan(fcon,'%d\t%d\t%d\t%f\t%f\t%12.8f\t%d\n','delimiter','\t');
         fclose(fcon);
     
         w1V(kk) = C{4}(1);
@@ -48,7 +48,7 @@ subT=zeros(1000,1);
 
 
 fcon =fopen(outputfile,'w');
-for netflag = 3
+for netflag = 1:6
 if netflag==1
     nodef=nodefiles{1};
 else
