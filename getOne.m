@@ -1,5 +1,5 @@
 function wop0=getOne()
-
+addpath(genpath(pwd))
 %% different for simulation sets
 nSim=100;
 outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/all/MICRFs_';
@@ -9,7 +9,7 @@ w1V=zeros(600,1);
 w2V=zeros(600,1);
 fV =zeros(600,1);
 
-for kk = 1:600
+for kk = 201:300
     netj=mod(kk,nSim);
     if netj == 0 
         netj=nSim;
@@ -40,7 +40,7 @@ dlmwrite('wop_6.txt',wop0);
 
 %% different for simulation sets
 
-addpath(genpath(pwd))
+
 [netfiles,benesss,adjfiles,nodefiles]=getFiles();
 outputfile = 'percent_TADA.txt';
 noder = textread('data_hq/trueg.txt','%s');
@@ -48,7 +48,7 @@ subT=zeros(1000,1);
 
 
 fcon =fopen(outputfile,'w');
-for netflag = 1:6
+for netflag = 3
 if netflag==1
     nodef=nodefiles{1};
 else
