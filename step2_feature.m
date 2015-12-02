@@ -24,7 +24,11 @@ score1=str2double(score1);
 node_s = intersect(nodes,genes);
 % read edge betweenness
 [enode1,enode2,be] = textread(beness,'%s -- %s\t%f');
-F=tiedrank(be)/length(be);
+%F=tiedrank(be)/length(be);
+cuto = quantile(be,0.75)+1.5*(quantile(be,0.75)-quantile(be,0.25));
+be(be>cuto)=cuto;
+F=be/max(be);
+
 edgesb1 = strcat(enode1,'_',enode2);
 edgesb2 = strcat(enode2,'_',enode1);
 

@@ -49,16 +49,22 @@ total_genes_cutoff <- function(filenames,Tset,muts,alpha=0.5){
     cutoff
 }
 
-new_auc_11_9 <- function(filenames,Tset){
+new_auc_11_9 <- function(filenames,Tset,gf){
     
     library(ROCR)
     predictions <- list()
     labels <- list()
     
+    if(gf){ tmp <- read.csv(filenames[1])
+        genes <- tmp[rowSums(tmp[,c("dn.LoF","dn.mis3")]) > 0,1]
+    }  
+    
     for(i in 1:length(filenames)){
         filename <- filenames[i]
         if(grepl(".csv",filename)){ result <- read.csv(filename); 
         }else{result <- read.table(filename);}
+        
+        if(gf) result <- result[result[,1] %in% genes,]
         
         if(i==1){
             predictions[[i]] <-  -1* result[,"qvalue.dn"]

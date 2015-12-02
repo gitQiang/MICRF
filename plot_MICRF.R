@@ -194,7 +194,7 @@ recurrent_Rankes <- function(){
     tmp <- recurrent_Rank(Rcut,3,0.1);
     atmp <- matrix(0,8,Rcut);
     for(i in 1:8) atmp[i,] <- colMeans(tmp[,i,])
-    pdf(file="plot/reranks.pdf",width=10,height=8)
+    pdf(file="plot/reranks.pdf",width=11,height=8)
     par(mai=c(2,1,1,1))
     main=""
     xlab="Rank"
@@ -269,11 +269,11 @@ plot_AUC <- function(){
     AUC <- array(0,dim=c(8,20,8)) 
     TPcut <- 0.1
     for(j in 2:9){
-        AUC0 <- getAUC(j,TPcut)
+        AUC0 <- getAUC(j,TPcut,TRUE)
         AUC[j-1,,] <- AUC0
     }
     
-    aucf=paste("plot/AUC_11_26_",TPcut,".pdf",sep="")
+    aucf=paste("plot/AUC_12_01_",TPcut,".pdf",sep="")
     subs <- 1:8
     nmeth=length(subs)
     cols <- c("black","red","blue","brown","blueviolet","deeppink","darkgreen","darkcyan")
@@ -299,7 +299,7 @@ plot_AUC <- function(){
     dev.off()
 }
 
-getAUC <- function(j,TPcut){
+getAUC <- function(j,TPcut,gf=FALSE){
     
     source("misc_output.R")
     TADAFile="../TADA_DAWN/result/TADAdenovo_meta_dmis.csv"
@@ -314,7 +314,7 @@ getAUC <- function(j,TPcut){
     AUC0 <- array(0,dim=c(20,3+nnet))
     for(i in 1:20){   
         filenames <- onefnew(j,i,DAWNnames,Maginames) 
-        tmp <- new_auc_11_9(filenames,Tset)
+        tmp <- new_auc_11_9(filenames,Tset,gf)
         AUC0[i,] <- tmp$auc
     }
     
@@ -323,7 +323,7 @@ getAUC <- function(j,TPcut){
 
 oneROC <- function(){
     
-    TPcut <- 0.1; j <- 3; i <- 10; fprc <- 0.2
+    TPcut <- 0.1; j <- 4; i <- 11; fprc <- 1
     subs <- 1:8
     cols <- c("black","red","blue","brown","blueviolet","deeppink","darkgreen","darkcyan")
     legend=c("TADA","DAWN","MAGI","MICRF-iRef","MICRF-HPRD","MICRF-corr","MICRF-coexp","MICRF-CoPrePPI")
@@ -339,7 +339,7 @@ oneROC <- function(){
     close(con)
     
     filenames <- onefnew(j,i,DAWNnames,Maginames) 
-    tmp <- new_auc_11_9(filenames,Tset)
+    tmp <- new_auc_11_9(filenames,Tset,TRUE)
     TPR <- tmp$TPR
     FPR <- tmp$FPR
     
