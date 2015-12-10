@@ -24,10 +24,11 @@ score1=str2double(score1);
 node_s = intersect(nodes,genes);
 % read edge betweenness
 [enode1,enode2,be] = textread(beness,'%s -- %s\t%f');
-%F=tiedrank(be)/length(be);
-cuto = quantile(be,0.75)+1.5*(quantile(be,0.75)-quantile(be,0.25));
-be(be>cuto)=cuto;
-F=be/max(be);
+%F=tiedrank(be)/length(be); %uniform distribution
+%cuto = quantile(be,0.75)+1.5*(quantile(be,0.75)-quantile(be,0.25));
+%be(be>cuto)=cuto;
+%F=be/max(be); % log normal distribution
+F=log(be)/max(log(be)); % normal distritbution
 
 edgesb1 = strcat(enode1,'_',enode2);
 edgesb2 = strcat(enode2,'_',enode1);
@@ -52,6 +53,7 @@ Xnode(1,2,:) = Pri(2)*Pri(1);
 [~,i] = ismember(node_s,nodes);        
 Xnode(1,1,j) = score1(i)*Pri(2);
 Xnode(1,2,j) = (1 - score1(i))*Pri(1);
+Xnode = Xnode / mean(Xnode(:));
 
 % Make edge features
 n1 = edgeStruct.edgeEnds(:,1);
@@ -65,7 +67,7 @@ Xedge = zeros(nInstance,nEdgeFeatures,nEdges);
 Xedge(1,1,:) = reshape(min(Xnode(1,1,n1), Xnode(1,1,n2)),[],1).*F(sube);
 Xedge(1,2,:) = reshape(min(Xnode(1,1,n1), Xnode(1,2,n2)),[],1).*F(sube);
 Xedge(1,3,:) = reshape(min(Xnode(1,2,n1), Xnode(1,1,n2)),[],1).*F(sube);
-Xedge(1,4,:) = reshape(min(Xnode(1,2,n1), Xnode(1,2,n2)),[],1).*F(sube);
+Xedge(1,4,:) = reshape(max(Xnode(1,2,n1), Xnode(1,2,n2)),[],1).*F(sube);
 [nodeMap,edgeMap] = UGM_makeCRFmaps_ehq(Xnode,Xedge,edgeStruct);
 
 end

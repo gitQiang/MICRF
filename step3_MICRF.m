@@ -31,8 +31,8 @@ while (flag==0 && iter <= maxiter)
     % fix bugs for illegal direction
     if isnan(f)==1 
         fprintf('%d Here\n',iter);
-        w(1)=w(1)+6;
-        w(2)=w(2)+26;
+        w(1)=w(1)+20;
+        w(2)=w(2)+10;
         [nodePot,edgePot] = UGM_CRF_makePotentials(w,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,1);
         Y = UGM_Decode_LBP(nodePot,edgePot,edgeStruct);
         Y = int32(Y');

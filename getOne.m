@@ -5,9 +5,9 @@ nSim=100;
 outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/all/MICRFs_';
 wop0= zeros(2,6);
 
-w1V=zeros(600,1);
-w2V=zeros(600,1);
-fV =zeros(600,1);
+w1V=ones(600,1);
+w2V=ones(600,1);
+fV =1000000 * ones(600,1);
 
 for kk = 1:600
     netj=mod(kk,nSim);
@@ -39,15 +39,13 @@ end
 dlmwrite('wop_6.txt',wop0);
 
 %% different for simulation sets
-
-
 [netfiles,benesss,adjfiles,nodefiles]=getFiles();
 outputfile = 'percent_TADA.txt';
 noder = textread('data_hq/trueg.txt','%s');
 subT=zeros(1000,1);
 
-
 fcon =fopen(outputfile,'w');
+
 for netflag = 1:6
 if netflag==1
     nodef=nodefiles{1};
@@ -62,6 +60,19 @@ load(adjf);
 
 [genes,Xnode,Xedge,nodeMap,edgeMap,edgeStruct]=step2_feature(netfile,beness,nodef,adj);
 [nodePot,edgePot] = UGM_CRF_makePotentials(wop,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,1);
+
+if netflag == 1
+	fc =  fopen('/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/Fmap0121.txt','r');
+	C = textscan(fc,'%s%s','delimiter','\t');
+	id1=C{1};
+	id2=C{2};
+	fclose(fc);
+    [Lia,j]=ismember(genes,id1);
+    subs = find(Lia > 0);
+    sub2 = find(~strcmp(id2(j(subs)),'NA'));
+    genes(subs(sub2))=id2(j(subs(sub2)));
+end
+
 
 [~,j] = ismember(noder,genes);
 subT(:,1)=j;
