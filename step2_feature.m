@@ -24,11 +24,8 @@ score1=str2double(score1);
 node_s = intersect(nodes,genes);
 % read edge betweenness
 [enode1,enode2,be] = textread(beness,'%s -- %s\t%f');
-%F=tiedrank(be)/length(be); %uniform distribution
-%cuto = quantile(be,0.75)+1.5*(quantile(be,0.75)-quantile(be,0.25));
-%be(be>cuto)=cuto;
-%F=be/max(be); % log normal distribution
-F=log(be)/max(log(be)); % normal distritbution
+F=log(be)/max(log(be)); % max: normal distritbution
+%F=log(be)/mean(log(be)); % mean: normal distritbution, large variance to large edge weights to Inf in expotential scale
 
 edgesb1 = strcat(enode1,'_',enode2);
 edgesb2 = strcat(enode2,'_',enode1);
