@@ -73,8 +73,10 @@ new_auc_11_9 <- function(filenames,Tset,gf){
             subs <- is.na(result[,"Stage2_posterior"])
             result[subs,"Stage2_posterior"] <- result[subs, "Stage1_posterior"]
             predictions[[i]] <-  -1* result[,"Stage2_posterior"]
-        }else{
+        }else if(i==3){
             predictions[[i]] <- result[,2]
+        }else{
+            predictions[[i]] <- dim(result)[1] - (1:dim(result)[1])
         }
         
         allP <- intersect(Tset,result[,1])
@@ -110,9 +112,6 @@ allPf <- function(TPcut,TADAFile="ASD/TADAresult/TADAdenovo_ASD4_16.csv"){
 
 onefnew <- function(j,i,DAWNnames,Maginames){
     
-    netstr <- c("STRING/","iRef/","coexp/","HPRD/","coexp1/","corr/","coexp5/","coexp7/")
-    netnum <- c(31,6,7,20,21,26,27,28)
-    
     tadastr <- "../TADA_DAWN/result/randset_1/TADAdenovo_ASD"
     DAWNstr <- "../TADA_DAWN/DAWN_package/result/randset_1/DAWN_randset"
     MAGIstr <- "../MAGI_V0.1_Alpha/mydata/randset_1/RandomGeneList."
@@ -134,21 +133,7 @@ onefnew <- function(j,i,DAWNnames,Maginames){
     DAWNfile <- paste(DAWNstr,nuk[1],".csv",sep="")
     MAGIfile <- paste(MAGIstr,nuk[2],sep="") 
     
-#     nnet <- length(netstr)
-#     hotnetfile <- 1:nnet
-#     misfile <- 1:nnet
-#     for(k in 1:nnet){
-#         hotnetfile[k] <- paste(resultstr,netstr[k],"hotnetresult1",tmpstr,netnum[k],".txt",sep="")
-#         if(k==1){
-#             misfile[k] <- paste("result/randresult_5/",netstr[k],"CRFresult_",3,tmpstr,"LBP_",netnum[k],".txt",sep="")
-#         }else{
-#             misfile[k] <- paste("result/randresult_5/",netstr[k],"CRFresult_",netnum[k],tmpstr,"LBP_",netnum[k],".txt",sep="")
-#         }
-#     }
-#     
-#     filenames <- c(TADAfile,DAWNfile,MAGIfile,hotnetfile,misfile)
-
-    misfile <- paste("result/randresult_5/MICRFresult_",2:6,"_",j,"_",i,".txt",sep="")
+    misfile <- paste("result/randresult_5/MICRFresult_",1:6,"_",j,"_",i,".txt",sep="")
     filenames <- c(TADAfile,DAWNfile,MAGIfile,misfile)
 
     filenames

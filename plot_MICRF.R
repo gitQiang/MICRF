@@ -1,3 +1,8 @@
+source("misc_output.R")
+nmeth=9
+cols <- c("black","red","blue","yellow4","brown","blueviolet","deeppink","darkgreen","darkcyan")
+legend <- c("TADA","DAWN","MAGI","MICRF-STRING","MICRF-iRef","MICRF-HPRD","MICRF-corr","MICRF-coexp","MICRF-CoPrePPI")
+
 leaveone_Rank <- function(Rcut,flag=1){
     
     options(stringsAsFactors=FALSE)
@@ -7,17 +12,18 @@ leaveone_Rank <- function(Rcut,flag=1){
     asdall[is.na(asdall[,"qvalue.dn"]),"qvalue.dn"] <- 1
     Tset <- asdall[asdall[,"qvalue.dn"]<=TPcut,1]
     ### leave one mutation ==========================================
-    if(flag==1) nLeo <- array(0,dim=c(8,2,1))
-    if(flag==2) nLeo <- array(0,dim=c(8,2,Rcut)) 
+    
+    if(flag==1) nLeo <- array(0,dim=c(nmeth,2,1))
+    if(flag==2) nLeo <- array(0,dim=c(nmeth,2,Rcut)) 
 
     ### contorls data
-    cfiles <- c("../TADA_DAWN/result/TADAdenovo_control1911.csv","../TADA_DAWN/DAWN_package/DAWNcontrol1911.csv","../MAGI_V0.1_Alpha/mydata/control/RandomGeneList.3",paste('/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/control/v5/MICRFresult_',2:6,".txt",sep=""))
+    cfiles <- c("../TADA_DAWN/result/TADAdenovo_control1911.csv","../TADA_DAWN/DAWN_package/DAWNcontrol1911.csv","../MAGI_V0.1_Alpha/mydata/control/RandomGeneList.3",paste('/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/control/v5/MICRFresult_',1:(nmeth-3),".txt",sep="")) ### ==== change the method number ###
     for(i in 1:length(cfiles)){
         nLeo[i,2,] <- onefileC(Tset,cfiles[i],i,Rcut,flag)
     }
     
     n.t <- length(Tset)
-    tmp <- array(0,dim=c(8,n.t))
+    tmp <- array(0,dim=c(nmeth,n.t))
     outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/control/v5/MICRFresult_';
     for(i in 1:n.t){
         ### TADA method 
@@ -30,17 +36,17 @@ leaveone_Rank <- function(Rcut,flag=1){
         filename <- paste("../MAGI_V0.1_Alpha/mydata/leaveone4/RandomGeneList.",i,sep="")
         tmp[3,i] <- onefileL(Tset[i],filename,3,Rcut,flag)
         ### MICRF method
-        for(j in 1:5){
-            filename <- paste("result/leaveone4result_5/MICRFresult_",j+1,"_",i,".txt",sep="");
+        for(j in 1:(nmeth-3)){ ### ==== change the method number ###
+            filename <- paste("result/leaveone4result_5/MICRFresult_",j,"_",i,".txt",sep="");
             tmp[3+j,i] <- onefileL(Tset[i],filename,3+j,Rcut,flag)
         }
     }
     
-    for(i in 1:8){
+    for(i in 1:nmeth){
         if(flag==1)  nLeo[i,1,] <- sum(tmp[i,]) 
         if(flag==2){
             inrtmp <- rep(0,Rcut);
-            #inrtmp[tmp[i,tmp[i,] > 0]] <- 1; ## occur in the same position
+            #inrtmp[tmp[i,tmp[i,] > 0]] <- 1; ## bugs for occurring in the same position
             ttmp <- table(tmp[i,])
             subs <- as.numeric(names(ttmp)) > 0
             inrtmp[as.numeric(names(ttmp))[subs]] <- ttmp[subs];
@@ -53,9 +59,10 @@ leaveone_Rank <- function(Rcut,flag=1){
 }
 
 leaveone_Rankes <- function(){
+     
     source("plot_MICRF.R")
     Vrank <- c(100,200,300,500,1000,5000)
-    TPM <- matrix(0,8,length(Vrank))
+    TPM <- matrix(0,nmeth,length(Vrank))
     FPM <- TPM
     for(i in 1:length(Vrank)){
         tmp <- leaveone_Rank(Vrank[i]);
@@ -69,17 +76,15 @@ leaveone_Rankes <- function(){
     tmp <- leaveone_Rank(Rcut,2);
     str <- c("case","control")
     for (j in 1:2){
-    atmp <- tmp[,j,]
-    pdf(file=paste("plot/leaveone",str[j],".pdf",sep=""),width=10,height=8)
-    par(mai=c(2,1,1,1))
-    main=""
-    xlab="Rank"
-    ylab="Number of risk genes"
-    cols <- c("black","red","blue","brown","blueviolet","deeppink","darkgreen","darkcyan")
-    legend=c("TADA","DAWN","MAGI","MICRF-iRef","MICRF-HPRD","MICRF-corr","MICRF-coexp","MICRF-CoPrePPI")
-    plot_matrix(atmp,cols,main,xlab,ylab)
-    legend("topleft",legend=legend,col=cols,lwd=2,lty=1,cex=1.25,y.intersp=1)
-    dev.off()
+        atmp <- tmp[,j,]
+        pdf(file=paste("plot/leaveone",str[j],".pdf",sep=""),width=10,height=8)
+        par(mai=c(2,1,1,1))
+        main=""
+        xlab="Rank"
+        ylab="Number of risk genes"
+        plot_matrix(atmp,cols,main,xlab,ylab)
+        legend("topleft",legend=legend,col=cols,lwd=2,lty=1,cex=1.25,y.intersp=1)
+        dev.off()
     }
 }
 
@@ -134,10 +139,11 @@ recurrent_Rank <- function(Rcut,flag=1,TPcut=0.1){
     asdall <- read.csv(TADAFile)
     asdall[is.na(asdall[,"qvalue.dn"]),"qvalue.dn"] <- 1
     Tset <- asdall[asdall[,"qvalue.dn"]<=TPcut,1]
+
     
     #######  independent samples  ===================================
-    if(flag <=2) ReM <- array(0,dim=c(20,8,1))
-    if(flag ==3) ReM <- array(0,dim=c(20,8,Rcut))
+    if(flag <=2) ReM <- array(0,dim=c(20,nmeth,1))
+    if(flag ==3) ReM <- array(0,dim=c(20,nmeth,Rcut))
     j=3
     for(i in 1:20){
         #onefile <- paste("DDD_mutations/randset4/ASD2sub",j,"derest",i,".csv",sep="")
@@ -161,8 +167,8 @@ recurrent_Rank <- function(Rcut,flag=1,TPcut=0.1){
         
         ### our method
         path = "/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randresult4_5/"
-        for(netk in 1:5){
-            myfile <- paste(path,"MICRFresult_",netk+1,"_",i,".txt",sep="")
+        for(netk in 1:(nmeth-3)){
+            myfile <- paste(path,"MICRFresult_",netk,"_",i,".txt",sep="")
             ReM[i,3+netk,] <- onefile(myfile,Rcut,Tset,oneresult,flag,1);
         }
     }
@@ -188,22 +194,42 @@ recurrent_Rankes <- function(){
         Rlist2[[i]] <- tmp
     }
     recurrent_plots(Rlist2,2,0.1)  
+    
+    ##====== new ====
     setwd("/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/")
     source("plot_MICRF.R")
+    #maxE <- mean(recurrent_max())
     Rcut=500
     tmp <- recurrent_Rank(Rcut,3,0.1);
-    atmp <- matrix(0,8,Rcut);
-    for(i in 1:8) atmp[i,] <- colMeans(tmp[,i,])
+    atmp <- matrix(0,nmeth,Rcut);
+    for(i in 1:nmeth) atmp[i,] <- colMeans(tmp[,i,])
     pdf(file="plot/reranks.pdf",width=11,height=8)
     par(mai=c(2,1,1,1))
     main=""
     xlab="Rank"
     ylab="Number of recurrent genes"
-    cols <- c("black","red","blue","brown","blueviolet","deeppink","darkgreen","darkcyan")
-    legend=c("TADA","DAWN","MAGI","MICRF-iRef","MICRF-HPRD","MICRF-corr","MICRF-coexp","MICRF-CoPrePPI")
     plot_matrix(atmp,cols,main,xlab,ylab)
     legend("bottomright",legend=legend,col=cols,lwd=2,lty=1,cex=1.25,y.intersp=1)
     dev.off()
+}
+
+recurrent_max <- function(){
+    
+    tmp <- rep(0,20)
+    j=3
+    for(i in 1:20){
+        onefile <- paste("DDD_mutations/randset4/ASD1sub",j,"depart",i,".csv",sep="")
+        oneresult <- read.csv(onefile)
+        geneone <- oneresult[rowSums(oneresult[,c("dn.LoF","dn.mis3")]) > 0,1]
+        
+        TADAfile <- paste("../TADA_DAWN/result/randset4/TADAdenovo_ASD2sub",j,"derest",i,".csv",sep="")
+        tworesult <- read.csv(TADAfile)
+        genetwo <- tworesult[rowSums(tworesult[,c("dn.LoF","dn.mis3")]) > 0,1]
+        
+        tmp[i] <- length(intersect(geneone,genetwo))
+    }
+
+    tmp
 }
 
 recurrent_plots <- function(Rlist,flag=1,TPcut=0.3){    
@@ -264,21 +290,16 @@ plot_matrix <- function(tmp,cols,main,xlab,ylab,byrow=TRUE){
 
 ## ROC plots
 plot_AUC <- function(){
-    source("plot_MICRF.R")
-    source("misc_output.R")
-    AUC <- array(0,dim=c(8,20,8)) 
+    
+    AUC <- array(0,dim=c(8,20,nmeth)) 
     TPcut <- 0.1
     for(j in 2:9){
         AUC0 <- getAUC(j,TPcut,TRUE)
         AUC[j-1,,] <- AUC0
     }
     
-    aucf=paste("plot/AUC_12_01_",TPcut,".pdf",sep="")
-    subs <- 1:8
-    nmeth=length(subs)
-    cols <- c("black","red","blue","brown","blueviolet","deeppink","darkgreen","darkcyan")
-    legend=c("TADA","DAWN","MAGI","MICRF-iRef","MICRF-HPRD","MICRF-corr","MICRF-coexp","MICRF-CoPrePPI")
-    
+    aucf=paste("plot/AUC_12_08_",TPcut,".pdf",sep="")
+    subs <- 1:9
     ## above to change
     pdf(file=aucf,width=12,height=10)
     par(mar=c(6,6,3,2))
@@ -301,7 +322,6 @@ plot_AUC <- function(){
 
 getAUC <- function(j,TPcut,gf=FALSE){
     
-    source("misc_output.R")
     TADAFile="../TADA_DAWN/result/TADAdenovo_meta_dmis.csv"
     Tset <- allPf(TPcut,TADAFile)
     
@@ -310,8 +330,7 @@ getAUC <- function(j,TPcut,gf=FALSE){
     Maginames <-  readLines(con <- file("../MAGI_V0.1_Alpha/mydata/randset_1/MAGIfilenames.txt","r"))   
     close(con)
     
-    nnet <- 5
-    AUC0 <- array(0,dim=c(20,3+nnet))
+    AUC0 <- array(0,dim=c(20,nmeth))
     for(i in 1:20){   
         filenames <- onefnew(j,i,DAWNnames,Maginames) 
         tmp <- new_auc_11_9(filenames,Tset,gf)
@@ -321,16 +340,12 @@ getAUC <- function(j,TPcut,gf=FALSE){
     AUC0
 }
 
-oneROC <- function(){
-    
-    TPcut <- 0.1; j <- 4; i <- 11; fprc <- 1
-    subs <- 1:8
-    cols <- c("black","red","blue","brown","blueviolet","deeppink","darkgreen","darkcyan")
-    legend=c("TADA","DAWN","MAGI","MICRF-iRef","MICRF-HPRD","MICRF-corr","MICRF-coexp","MICRF-CoPrePPI")
-    nmeth <- length(subs)
-    
+oneROC <- function(TPcut=0.1,j=2,i=2,fprc=1){
+
+    subs <- 1:nmeth
+
     #### above to change 
-    source("misc_output.R")
+    
     TADAFile="../TADA_DAWN/result/TADAdenovo_meta_dmis.csv"
     Tset <- allPf(TPcut,TADAFile)
     DAWNnames <-  readLines(con <- file("../TADA_DAWN/DAWN_package/TADAdenovo_randset_1.txt","r"))   
@@ -343,7 +358,7 @@ oneROC <- function(){
     TPR <- tmp$TPR
     FPR <- tmp$FPR
     
-    pdf(file=paste("plot/one_ROC",fprc,".pdf",sep=""),width=12,height=10)
+    pdf(file=paste("plot/one_ROC",j,"_",i,"_",fprc,".pdf",sep=""),width=12,height=10)
     par(mar=c(6,6,3,2))
     x <- FPR[[subs[1]]]
     y <- TPR[[subs[1]]]
