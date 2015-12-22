@@ -63,6 +63,7 @@ new_auc_11_9 <- function(filenames,Tset,gf){
         filename <- filenames[i]
         if(grepl(".csv",filename)){ result <- read.csv(filename); 
         }else{result <- read.table(filename);}
+        result <- cbind(result,1:dim(result)[1])
         
         if(gf) result <- result[result[,1] %in% genes,]
         
@@ -76,7 +77,7 @@ new_auc_11_9 <- function(filenames,Tset,gf){
         }else if(i==3){
             predictions[[i]] <- result[,2]
         }else{
-            predictions[[i]] <- dim(result)[1] - (1:dim(result)[1])
+            predictions[[i]] <- - result[,dim(result)[2]]
         }
         
         allP <- intersect(Tset,result[,1])

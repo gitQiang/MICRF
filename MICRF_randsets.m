@@ -48,6 +48,13 @@ if nrand == 4
     outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/control/v5/MICRFresult_';
 end
 
+if nrand == 5
+    % 5542 DDD samples, 1 for each net
+    nSim=1;
+    inputpath='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/';
+    inputstr='meta';
+    outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/DDD5542/MICRFresult_';
+end    
 %%
 netj=mod(kk,nSim);
 if netj == 0 
@@ -72,7 +79,7 @@ if nrand == 1
     end
     nodef=[inputpath,instr,inputstr,int2str(netj_i),'_',int2str(netj_j),'.txt'];
     outputfile=[outputstr,int2str(netflag),'_',int2str(netj_i),'_',int2str(netj_j),'.txt'];
-elseif nrand == 4
+elseif (nrand == 4) || (nrand == 5)
     nodef=[inputpath instr inputstr '.txt'];
     outputfile=[outputstr int2str(netflag) '.txt'];
 else
