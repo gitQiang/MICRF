@@ -1,33 +1,21 @@
-function oneLearn(kk,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,outputfile)
-
-fprintf('%d\n',kk);
+function [Y,nps,w]=step3_MICRFt(Xnode,Xedge,nodeMap,edgeMap,edgeStruct,w0)
 
 %% training 
-nParams = max([nodeMap(:);edgeMap(:)]);
-w = ones(nParams,1);
-f = 100000;
-i = floor((kk-1)/10) + 1;
-j = mod(kk,10);
-if j==0 
-    j = 10; 
-end
-
-w(1)=i/10;
-w(2)=j/10;
 % initial parameters
-w0 = w;
+f = 100000;
 f0 = f;
+w=w0;
 flag = 0;
 iter = 0;
-inferFunc = @UGM_Infer_LBP; %inferFunc = @UGM_Infer_TRBP; %inferFunc = @UGM_Infer_MeanField; %inferFunc = @UGM_Infer_Junction;  %inferFunc = @UGM_Infer_Block_MF;   %inferFunc = @UGM_Infer_Conditional; 
-
 maxiter=100;
+inferFunc = @UGM_Infer_LBP; 
+
 maxFunEvals = 20;
 options = [];
 options.maxFunEvals = maxFunEvals;
 options.progTol = 1e-3;
 options.optTol = 1e-3;
-
+        
 while (flag==0 && iter <= maxiter)
     % update potentials
     [nodePot,edgePot] = UGM_CRF_makePotentials(w,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,1);
@@ -36,15 +24,15 @@ while (flag==0 && iter <= maxiter)
     Y = int32(Y');
 
     % training a CRF model
-    lambda = ones(size(w)); %lambda(2) = 10;
+    lambda = ones(size(w)); 
     regFunObj = @(w)penalizedL2(w,@UGM_CRF_NLL,lambda,Xnode,Xedge,Y,nodeMap,edgeMap,edgeStruct,inferFunc);
     [w,f]= minFunc(regFunObj,w,options);
-    
+   
     % fix bugs for illegal direction
     if isnan(f)==1 
-        fprintf('%d Here\n',iter);
-        w(1)=w(1)+6;
-        w(2)=w(2)+26;
+        %fprintf('%d Here\n',iter);
+        w(1)=randi(20);
+        w(2)=randi(20);
         [nodePot,edgePot] = UGM_CRF_makePotentials(w,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,1);
         Y = UGM_Decode_LBP(nodePot,edgePot,edgeStruct);
         Y = int32(Y');
@@ -54,25 +42,28 @@ while (flag==0 && iter <= maxiter)
     end
     
     if isnan(f)
-       w = w0;
-       f = f0;
-       flag = 2;
-       break;
+        w = w0;
+        break;
     end
-    
-    if norm(w-w0,1) <= 1e-5 && abs(f-f0) <= 1e-5 
+    if norm(w-w0,1) <= 1e-5 && norm(f-f0,1) <= 1e-5
         flag = 1;
     else
         f0 = f;
         w0 = w;
     end
-
+    
     iter = iter + 1;
-    fprintf('%d\n',iter);
+    %fprintf('%d\n',iter);
 end
 
-fileID = fopen(outputfile,'w');
-fprintf(fileID,'%d\t%d\t%d\t%f\t%f\t%12.8f\t%d\n',kk,i,j,w(1),w(2),f,flag);
-fclose(fileID);
+%% decoding and inferring    
+[nodePot,edgePot] = UGM_CRF_makePotentials(w,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,1);
+Y = UGM_Decode_LBP(nodePot,edgePot,edgeStruct); % decoding a CRF model
+Y = int32(Y');
+nps = UGM_Infer_LBP(nodePot,edgePot,edgeStruct); % infer conditional probability
+if any(isnan(nps))
+    % nps = UGM_Infer_TRBP(nodePot,edgePot,edgeStruct); % trying TRBP
+    nps(isnan(nps)) = Xnode(isnan(nps)); 
+end
 
 end
