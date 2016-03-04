@@ -69,17 +69,28 @@ DDD_randset <- function(){
 
 TADAinputT <- function(){
     ##### after running TADA: randsetDDD.R
-    source("Network_analysis.R")
-    source("Multi_net.R")
+    #source("Network_analysis.R")
+    #source("Multi_net.R")
     source("DDD_randset.R")
-    #dirstr <- "result/randset4/"
-    dirstr <- "result/randset4_2/"
+    dirstr <- "result/randset4/"
+    #dirstr <- "result/randset4_2/"
     for(j in 3){
         for(i in 1:20){
             filename=paste("../TADA_DAWN/result/randset4/TADAdenovo_ASD1sub",j,"depart",i,".csv",sep="")
             strname <- paste("part",j,"_",i,sep="")
             #TADAinput1(filename,strname,dirstr,genelist0=1)
-            TADAinput2(filename,strname,dirstr,genelist0=1)
+            #TADAinput2(filename,strname,dirstr,genelist0=1)
+            MAGIScore(filename,strname,dirstr)
+        }
+    }
+    
+    for(j in 3){
+        for(i in 1:20){
+            filename=paste("../TADA_DAWN/result/randset4/TADAdenovo_ASD2sub",j,"derest",i,".csv",sep="")
+            strname <- paste("rest",j,"_",i,sep="")
+            #TADAinput1(filename,strname,dirstr,genelist0=1)
+            ##TADAinput2(filename,strname,dirstr,genelist0=1)
+            MAGIScore(filename,strname,dirstr)
         }
     }
     
@@ -95,7 +106,8 @@ TADAinputT <- function(){
         filename=paste("../TADA_DAWN/result/leaveone4/TADAdenovo_rand2_",i,".csv",sep="")
         strname <- paste("rand2_",i,sep="")
         #TADAinput1(filename,strname,dirstr,genelist0=1)
-        TADAinput2(filename,strname,dirstr,genelist0=1)
+        #TADAinput2(filename,strname,dirstr,genelist0=1)
+        MAGIScore(filename,strname,dirstr)
     }
     
     ## after running TADA: randsetDDD.R
@@ -106,7 +118,8 @@ TADAinputT <- function(){
             filename=paste("../TADA_DAWN/result/randset_1/TADAdenovo_ASDrand1_",j,"_",i,".csv",sep="")
             strname <- paste("rand1",j,"_",i,sep="")
             #TADAinput1(filename,strname,dirstr,genelist0=1)
-            TADAinput2(filename,strname,dirstr,genelist0=1)
+            #TADAinput2(filename,strname,dirstr,genelist0=1)
+            MAGIScore(filename,strname,dirstr)
         }
     }
     
@@ -235,4 +248,68 @@ TADAinput2 <- function(filenames,strname,dirstr="random_samples/",pi0=0.94,genel
         write.table(cbind(rownames(nodesim),nodesim),file=infofile,quote=FALSE,col.names=FALSE,row.names=FALSE,sep="\t")
     }
     
+}
+
+TADAinput1 <- function(filenames,strname,dirstr="random_samples/",pi0=0.94,genelist0=""){
+    
+    if(genelist0==""){
+        bfs <- "BF"
+    }else{
+        bfs <- "BF.dn"
+    }    
+    mapT <- as.matrix(read.delim("Fmap0121.txt",header=FALSE,sep="\t"))
+    for(i in 1:length(filenames)){
+        TADAFile <- filenames[i]
+        geneinfo <- read.csv(TADAFile,stringsAsFactors=FALSE)
+        pi <- 1-pi0
+        
+        posP <- (geneinfo[,bfs]*pi)/(geneinfo[,bfs]*pi + 1-pi)
+        infofile <- paste(dirstr,"hotnet_input",strname[i],".txt",sep="")
+        write.table(cbind(geneinfo[,1],posP),file=infofile,quote=FALSE,col.names=FALSE,row.names=FALSE,sep="\t")
+        
+        genelist <- geneinfo[,1]
+        #if(genelist0==""){
+        #    genelist <- mapping_to(genelist)
+        #}
+        genelist <- mapT[match(genelist,mapT[,2]),1]
+        nodesim <- (geneinfo[,bfs]*pi)/(geneinfo[,bfs]*pi + 1-pi)
+        names(nodesim) <- genelist
+        subs <- !is.na(genelist)
+        nodesim <- nodesim[subs]
+        infofile <- paste(dirstr,"CRF_input",strname[i],".txt",sep="")
+        write.table(cbind(names(nodesim),nodesim),file=infofile,quote=FALSE,col.names=FALSE,row.names=FALSE,sep="\t")
+    }
+    
+}
+
+
+MAGIScore <- function(filename,strname,dirstr,pi0=0.94,N=5542){
+        mutaT <- read.csv(filename)
+        mutaT[mutaT[,"LOF"]==0,"LOF"] <- max(mutaT[,"LOF"])
+        mutaT[mutaT[,"dmis"]==0,"dmis"] <- max(mutaT[,"dmis"])
+        
+        mutaT[,"LOF"] <- mutaT[,"LOF"]/sum(mutaT[,"LOF"])
+        mutaT[,"dmis"] <- mutaT[,"dmis"]/sum(mutaT[,"dmis"])
+        Tlof <- sum(mutaT[,"dn.LoF"])
+        Tmis3 <- sum(mutaT[,"dn.mis3"])
+        s <-  sapply(1:dim(mutaT)[1], function(i) gScore(mutaT[i,"LOF"],mutaT[i,"dn.LoF"],Tlof) + gScore(mutaT[i,"dmis"],mutaT[i,"dn.mis3"],Tmis3) )
+        s <- s/max(s)
+        
+        MAGIg <- cbind(mutaT[,"Gene"],s)
+        MAGIg <- MAGIg[order(-s), ]
+        
+        
+        infofile <- paste(dirstr,"hotnet_input_MAGI",strname,".txt",sep="")
+        write.table(MAGIg,file=infofile,quote=FALSE,col.names=FALSE,row.names=FALSE,sep="\t")
+        mapT <- as.matrix(read.delim("Fmap0121.txt",header=FALSE,sep="\t"))        
+        genelist <- MAGIg
+        genelist[,1] <- mapT[match(genelist[,1],mapT[,2]),1]
+        genelist <- genelist[!is.na(genelist[,1]), ]
+        infofile <- paste(dirstr,"CRF_input_MAGI",strname,".txt",sep="")
+        write.table(genelist,file=infofile,quote=FALSE,col.names=FALSE,row.names=FALSE,sep="\t")
+        
+}
+
+gScore <- function(p,x,T){
+        -log(choose(T,x)) - x*log(p) - (T-x)*log(1-p) 
 }

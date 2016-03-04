@@ -1,7 +1,7 @@
 source("misc_output.R")
 nmeth=9
 cols <- c("black","red","blue","yellow4","brown","blueviolet","deeppink","darkgreen","darkcyan")
-legend <- c("TADA","DAWN","MAGI","MICRF-STRING","MICRF-iRef","MICRF-HPRD","MICRF-corr","MICRF-coexp","MICRF-CoPrePPI")
+legend <- c("TADA","DAWN-CORR","MAGI-HPRD","MICRF-STRING","MICRF-iRefIndex","MICRF-HPRD","MICRF-CORR","MICRF-CoEXP","MICRF-CoPrePPI")
 
 leaveone_Rank <- function(Rcut,flag=1){
     
@@ -37,7 +37,7 @@ leaveone_Rank <- function(Rcut,flag=1){
         tmp[3,i] <- onefileL(Tset[i],filename,3,Rcut,flag)
         ### MICRF method
         for(j in 1:(nmeth-3)){ ### ==== change the method number ###
-            filename <- paste("result/leaveone4result_5/MICRFresult_",j,"_",i,".txt",sep="");
+            filename <- paste("result/leaveone4result_5/MICRF_magiresult_",j,"_",i,".txt",sep="");
             tmp[3+j,i] <- onefileL(Tset[i],filename,3+j,Rcut,flag)
         }
     }
@@ -77,13 +77,13 @@ leaveone_Rankes <- function(){
     str <- c("case","control")
     for (j in 1:2){
         atmp <- tmp[,j,]
-        pdf(file=paste("plot/leaveone",str[j],".pdf",sep=""),width=10,height=8)
+        pdf(file=paste("plot/leaveone_3_4",str[j],".pdf",sep=""),width=10,height=8)
         par(mai=c(2,1,1,1))
         main=""
         xlab="Rank"
         ylab="Number of risk genes"
         plot_matrix(atmp,cols,main,xlab,ylab)
-        legend("topleft",legend=legend,col=cols,lwd=2,lty=1,cex=1.25,y.intersp=1)
+        legend("topleft",legend=legend,col=cols,lwd=2,lty=1,cex=1.5,y.intersp=1)
         dev.off()
     }
 }
@@ -100,7 +100,7 @@ leaveone_plots <- function(TPM,FPM){
         mp <- barplot(t(nLeo)[,ords], beside=T, ylab="#gold risk genes",cex.names=1.5, las=2, ylim=c(0,max(nLeo)), col=c("red","darkblue"),cex.lab=1.5,cex.axis=1.25,axes = FALSE, axisnames = FALSE)
         text(colMeans(mp), par("usr")[3], labels = legend[ords], srt = 45, adj = c(1.1,1.1), xpd = TRUE,cex=1.5)
         axis(2)
-        legend("topleft",legend=c("DDD case","SSC control"),cex=1.3,fill=c("red","darkblue")) 
+        legend("topleft",legend=c("DDD case","SSC control"),cex=1.5,fill=c("red","darkblue")) 
         dev.off()
     }
 }
@@ -168,7 +168,7 @@ recurrent_Rank <- function(Rcut,flag=1,TPcut=0.1){
         ### our method
         path = "/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randresult4_5/"
         for(netk in 1:(nmeth-3)){
-            myfile <- paste(path,"MICRFresult_",netk,"_",i,".txt",sep="")
+            myfile <- paste(path,"MICRF_magiresult_",netk,"_",i,".txt",sep="")
             ReM[i,3+netk,] <- onefile(myfile,Rcut,Tset,oneresult,flag,1);
         }
     }
@@ -203,13 +203,13 @@ recurrent_Rankes <- function(){
     tmp <- recurrent_Rank(Rcut,3,0.1);
     atmp <- matrix(0,nmeth,Rcut);
     for(i in 1:nmeth) atmp[i,] <- colMeans(tmp[,i,])
-    pdf(file="plot/reranks.pdf",width=11,height=8)
+    pdf(file="plot/reranks_3_4_2016.pdf",width=11,height=8)
     par(mai=c(2,1,1,1))
     main=""
     xlab="Rank"
     ylab="Number of recurrent genes"
     plot_matrix(atmp,cols,main,xlab,ylab)
-    legend("bottomright",legend=legend,col=cols,lwd=2,lty=1,cex=1.25,y.intersp=1)
+    legend("bottomright",legend=legend,col=cols,lwd=2,lty=1,cex=1.5,y.intersp=1)
     dev.off()
 }
 
@@ -298,13 +298,13 @@ plot_AUC <- function(){
         AUC[j-1,,] <- AUC0
     }
     
-    aucf=paste("plot/AUC_12_08_",TPcut,".pdf",sep="")
+    aucf=paste("plot/AUC_12_30_",TPcut,".pdf",sep="")
     subs <- 1:9
     ## above to change
     pdf(file=aucf,width=12,height=10)
     par(mar=c(6,6,3,2))
     main="AUC performance"
-    xlab="Number of trios";ylab="AUC";
+    xlab="Number of samples";ylab="AUC";
     x <- seq(0.2,0.9,0.1)
     Y1 <- rep(0,nmeth)
     for(i in subs){
@@ -316,7 +316,7 @@ plot_AUC <- function(){
             lines(x, y, type="b",col=cols[i],xaxt="n",lwd=2)
         } 
     } 
-    legend("bottomright",col=cols,legend=legend,lty=rep(1,nmeth),lwd=rep(2,nmeth),cex=1.5,y.intersp=1)
+    legend("bottomright",col=cols,legend=legend,lty=rep(1,nmeth),lwd=rep(2,nmeth),cex=1.6,y.intersp=1.25)
     dev.off()
 }
 
@@ -362,14 +362,27 @@ oneROC <- function(TPcut=0.1,j=2,i=2,fprc=1){
     par(mar=c(6,6,3,2))
     x <- FPR[[subs[1]]]
     y <- TPR[[subs[1]]]
-    plot(x[x<=fprc],y[x<=fprc],type="l",col=cols[1],ylim=c(0,1),xlab="1-specificity",ylab="sensitivity",cex.lab=2,cex.main=2,lwd=2,cex.axis=1.8)
+    plot(x[x<=fprc],y[x<=fprc],type="l",col=cols[1],ylim=c(0,1),xlab="1-specificity",ylab="sensitivity",cex.lab=2.1,cex.main=2,lwd=2,cex.axis=1.8)
     for(i in 2:nmeth){
         x <- FPR[[subs[i]]]
         y <- TPR[[subs[i]]]
         lines(x[x<=fprc],y[x<=fprc],type="l",col=cols[i],xaxt="n",lwd=2)
     }
-    legend("bottomright",col=cols,legend=legend,lty=rep(1,nmeth),lwd=rep(2,nmeth),cex=1,y.intersp=1)
+    legend("bottomright",col=cols,legend=legend,lty=rep(1,nmeth),lwd=rep(2,nmeth),cex=1.6,y.intersp=1.25)
     lines(c(0,1),c(0,1),type="l",lwd=2,lty=2)
     dev.off()
     
+}
+
+boxROCVar <- function(){
+    
+    TPcut <- 0.1
+    j=2
+    AUC0 <- getAUC(j,TPcut,TRUE)
+    pdf(file="plot/BoxAUC1108.pdf",width=12,height=10)
+    par(mai=c(3,1,1,1))
+    boxplot(AUC0,names=rep("",9),xlab="",ylab="AUC",ylim=c(0,1),cex.lab=1.5,cex.axis=1.4)
+    names <- c("TADA ","DAWN-CORR","MAGI-HPRD","MICRF-STRING","MICRF-iRefIndex","MICRF-HPRD","MICRF-CORR","MICRF-CoEXP","MICRF-CoPrePPI")
+    text(1:9, par("usr")[3], labels = names, srt = 45, adj = c(1.1,1.1), xpd = TRUE,cex=1.5)
+    dev.off()
 }
