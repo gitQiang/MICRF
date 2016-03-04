@@ -77,7 +77,7 @@ leaveone_Rankes <- function(){
     str <- c("case","control")
     for (j in 1:2){
         atmp <- tmp[,j,]
-        pdf(file=paste("plot/leaveone_3_4",str[j],".pdf",sep=""),width=10,height=8)
+        pdf(file=paste("plot/leaveone_3_4_pois_0",str[j],".pdf",sep=""),width=10,height=8)
         par(mai=c(2,1,1,1))
         main=""
         xlab="Rank"
@@ -203,7 +203,7 @@ recurrent_Rankes <- function(){
     tmp <- recurrent_Rank(Rcut,3,0.1);
     atmp <- matrix(0,nmeth,Rcut);
     for(i in 1:nmeth) atmp[i,] <- colMeans(tmp[,i,])
-    pdf(file="plot/reranks_3_4_2016.pdf",width=11,height=8)
+    pdf(file="plot/reranks_3_4_2016_pois_0.pdf",width=11,height=8)
     par(mai=c(2,1,1,1))
     main=""
     xlab="Rank"

@@ -22,6 +22,7 @@ DDD_randset <- function(){
     dirstr <- "result/"
     TADAinput1(filename,strname,dirstr,genelist0=1)
     TADAinput2(filename,"meta2",dirstr,genelist0=1)
+    MAGIScore(filename,strname,dirstr)
     
     n <- length(samples)
     #### the thrid case: independent data sets
@@ -80,7 +81,7 @@ TADAinputT <- function(){
             strname <- paste("part",j,"_",i,sep="")
             #TADAinput1(filename,strname,dirstr,genelist0=1)
             #TADAinput2(filename,strname,dirstr,genelist0=1)
-            MAGIScore(filename,strname,dirstr)
+            MAGIScore(filename,strname,dirstr,0.94,1848)
         }
     }
     
@@ -90,13 +91,13 @@ TADAinputT <- function(){
             strname <- paste("rest",j,"_",i,sep="")
             #TADAinput1(filename,strname,dirstr,genelist0=1)
             ##TADAinput2(filename,strname,dirstr,genelist0=1)
-            MAGIScore(filename,strname,dirstr)
+            MAGIScore(filename,strname,dirstr,0.94,3694)
         }
     }
     
     ## after running TADA: randsetDDD.R
-    #dirstr <- "result/leaveone4/"
-    dirstr <- "result/leaveone4_2/"
+    dirstr <- "result/leaveone4/"
+    #dirstr <- "result/leaveone4_2/"
     filename <- "../TADA_DAWN/result/TADAdenovo_meta_dmis.csv"
     asddata <- read.csv(filename)
     asddata[is.na(asddata[,"qvalue.dn"]),"qvalue.dn"] <- 1
@@ -107,19 +108,19 @@ TADAinputT <- function(){
         strname <- paste("rand2_",i,sep="")
         #TADAinput1(filename,strname,dirstr,genelist0=1)
         #TADAinput2(filename,strname,dirstr,genelist0=1)
-        MAGIScore(filename,strname,dirstr)
+        MAGIScore(filename,strname,dirstr,0.94,5542)
     }
     
     ## after running TADA: randsetDDD.R
-    #dirstr <- "result/randset_1/"
-    dirstr <- "result/randset_1_2/"
+    dirstr <- "result/randset_1/"
+    #dirstr <- "result/randset_1_2/"
     for(j in 2:9){
         for(i in 1:20){
             filename=paste("../TADA_DAWN/result/randset_1/TADAdenovo_ASDrand1_",j,"_",i,".csv",sep="")
             strname <- paste("rand1",j,"_",i,sep="")
             #TADAinput1(filename,strname,dirstr,genelist0=1)
             #TADAinput2(filename,strname,dirstr,genelist0=1)
-            MAGIScore(filename,strname,dirstr)
+            MAGIScore(filename,strname,dirstr,0.94,ceiling(5542*j/10))
         }
     }
     
@@ -282,22 +283,37 @@ TADAinput1 <- function(filenames,strname,dirstr="random_samples/",pi0=0.94,genel
     
 }
 
-
 MAGIScore <- function(filename,strname,dirstr,pi0=0.94,N=5542){
         mutaT <- read.csv(filename)
         mutaT[mutaT[,"LOF"]==0,"LOF"] <- max(mutaT[,"LOF"])
         mutaT[mutaT[,"dmis"]==0,"dmis"] <- max(mutaT[,"dmis"])
         
-        mutaT[,"LOF"] <- mutaT[,"LOF"]/sum(mutaT[,"LOF"])
-        mutaT[,"dmis"] <- mutaT[,"dmis"]/sum(mutaT[,"dmis"])
-        Tlof <- sum(mutaT[,"dn.LoF"])
-        Tmis3 <- sum(mutaT[,"dn.mis3"])
-        s <-  sapply(1:dim(mutaT)[1], function(i) gScore(mutaT[i,"LOF"],mutaT[i,"dn.LoF"],Tlof) + gScore(mutaT[i,"dmis"],mutaT[i,"dn.mis3"],Tmis3) )
-        s <- s/max(s)
+        ## NULL model is binomial distribution
+        #mutaT[,"LOF"] <- mutaT[,"LOF"]/sum(mutaT[,"LOF"])
+        #mutaT[,"dmis"] <- mutaT[,"dmis"]/sum(mutaT[,"dmis"])
+        #Tlof <- sum(mutaT[,"dn.LoF"])
+        #Tmis3 <- sum(mutaT[,"dn.mis3"])
+        #s <-  sapply(1:dim(mutaT)[1], function(i) gScore(mutaT[i,"LOF"],mutaT[i,"dn.LoF"],Tlof) + gScore(mutaT[i,"dmis"],mutaT[i,"dn.mis3"],Tmis3) )
         
+        ## NULL model is poission distribution
+        s <- - dpois(mutaT[,"dn.LoF"],2*N*mutaT[,"LOF"],log=TRUE) - dpois(mutaT[,"dn.mis3"],2*N*mutaT[,"dmis"],log=TRUE)
+        ## P(y=0|x) = (P(x|y=0) * P(y=0))/p(x)
+        ## -log(P(y=0|x)) = - (log(P(x|y=0)) + log(P(y=0)) - log(p(x))) = 
+        #s <- s - log(pi0) + mutaT[,"dn.LoF"]*log(mutaT[,"LOF"]) + mutaT[,"dn.mis3"]*log(mutaT[,"dmis"])
+        s <- s - log(pi0) + mutaT[,"dn.LoF"]*dpois(1,2*N*mutaT[,"LOF"],log=TRUE) + mutaT[,"dn.mis3"]*dpois(1,2*N*mutaT[,"dmis"],log=TRUE)
+        s <- 1 - exp(-s)
+        
+        #s <- s/max(s) ## one
+        #s <- log(s) ## two
+        #s <- (s-min(s))/(max(s)-min(s)) ## two
+        #s <- log(1+s) three
+        #s <- (s-min(s))/(max(s)-min(s)) ## three
+        
+        subs <- rowSums(mutaT[,c("dn.LoF","dn.mis3")])==0
+        s[subs] <- 0
+        s[s<0] <- 0
         MAGIg <- cbind(mutaT[,"Gene"],s)
         MAGIg <- MAGIg[order(-s), ]
-        
         
         infofile <- paste(dirstr,"hotnet_input_MAGI",strname,".txt",sep="")
         write.table(MAGIg,file=infofile,quote=FALSE,col.names=FALSE,row.names=FALSE,sep="\t")
@@ -313,3 +329,6 @@ MAGIScore <- function(filename,strname,dirstr,pi0=0.94,N=5542){
 gScore <- function(p,x,T){
         -log(choose(T,x)) - x*log(p) - (T-x)*log(1-p) 
 }
+
+
+
