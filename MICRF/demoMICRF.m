@@ -1,20 +1,30 @@
-function demoMICRF(netfile,beness,nodef,adjf,feaf)
+function demoMICRF()
 
-%% steps:
+% add MICRF function into current work space
+addpath(genpath(pwd))
 
-% step 1: generate the adj matrix for each network
-adj = step1_adj(netfile);
-% save(adjf,adj)
+% MICRF inputs and outputs information
+help MICRF
 
-% step 2: make the node feature and edge feature
-step2_feature(netfile,beness,nodef,adjf,feaf)
+% MICRF with one node score file
+nodefile='data/Inputs/hotnet_inputmeta.txt';
+out=MICRF(nodefile); 
 
-% step 3: optimal the parameters
+% MICRF with one selected network
+netfile='HPRD';
+out=MICRF(nodefile,netfile); 
 
-% qsub.m
-% getonePara.m
+% MICRF with users given network
+netfile='data/Inputs/Co_PrePPI_3.txt';
+out=MICRF(nodefile,netfile); 
 
-% step 4: give the infer ande decoding results based on optimal parameters
-[Y,nps,eps,logZ]=step4_infer(feaf,wop)
+% MICRF with output file
+netfile='CoPrePPI';
+outputfile='MICRFtest.txt';
+out=MICRF(nodefile,netfile,outputfile); 
+
+% MICRF with different non-risk prior
+pi0=0.96;
+[out,w]=MICRF(nodefile,netfile,outputfile,pi0);
 
 end

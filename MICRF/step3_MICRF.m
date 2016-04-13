@@ -36,7 +36,7 @@ while (flag==0 && iter <= maxiter)
         [nodePot,edgePot] = UGM_CRF_makePotentials(w,Xnode,Xedge,nodeMap,edgeMap,edgeStruct,1);
         Y = UGM_Decode_LBP(nodePot,edgePot,edgeStruct);
         Y = int32(Y');
-        lambda = ones(size(w)); %lambda(2) = 10;
+        lambda = ones(size(w));%lambda(2) = 10;
         regFunObj = @(w)penalizedL2(w,@UGM_CRF_NLL,lambda,Xnode,Xedge,Y,nodeMap,edgeMap,edgeStruct,inferFunc);
         [w,f]= minFunc(regFunObj,w,options);
     end

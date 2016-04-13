@@ -19,16 +19,16 @@ if nrand == 1
     % rand set 1: j = 2:9, i=1:20 for each net
     nSim=160;
     inputpath='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randset_1/';
-    inputstr='3rand1';
-    outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randresult_5/MICRF3result_';
+    inputstr='_MAGIrand1';
+    outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randresult_5/MICRF_magiresult_';
 end
 
 if nrand == 2
     % rand set 2: leave-one mutation, 121 gold risk genes
-    nSim=149;
+    nSim=121;
     inputpath='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/leaveone4/';
-    inputstr='rand3_2_';
-    outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/leaveone4result_5/MICRF3result_';
+    inputstr='_MAGIrand2_';
+    outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/leaveone4result_5/MICRF_magiresult_';
 end
 
 if nrand == 3 
@@ -36,32 +36,32 @@ if nrand == 3
     nSim=20;
     inputpath='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randset4/';
     %inputstr='part3_';
-    inputstr='3rest3_';
-    outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randresult4_5/MICRF3result_';
+    inputstr='_MAGIrest3_';
+    outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/randresult4_5/MICRF_magiresult_';
 end
 
 if nrand == 4
     % rand set 4: 1911 controls samples, 1 for each net
     nSim=1;
     inputpath='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/control/';
-    inputstr='control1911_3';
-    outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/control/v5/MICRF3result_';
+    inputstr='_MAGIcontrol1911';
+    outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/control/v5/MICRF_magiresult_';
 end
 
 if nrand == 5
     % 5542 DDD samples, 1 for each net
     nSim=1;
     inputpath='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/';
-    inputstr='meta3';
-    outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/DDD5542/MICRF3result_';
+    inputstr='_MAGImeta';
+    outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/DDD5542/MICRF_magiresult_';
 end
 
 if nrand == 6
     % nature 13772, 1 for each net
     nSim=1;
     inputpath='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/';
-    inputstr='nat13772_3';
-    outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/nat13772/MICRF3result_';
+    inputstr='_MAGInat13772';
+    outputstr='/ifs/scratch/c2b2/ys_lab/qh2159/Mutations/CHD/MIS/result/nat13772/MICRF_magiresult_';
 end
 
 %%
